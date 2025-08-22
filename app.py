@@ -2,6 +2,32 @@ import streamlit as st
 import pandas as pd
 import traceback
 import sys
+
+
+# ==== [한글 폰트 설정: matplotlib + 스트림릿 클라우드 전용] ====
+import os
+
+# 1) 캐시 폴더 (클라우드에서 권한 문제 피하기) - pyplot import 전!
+os.environ["MPLCONFIGDIR"] = "/tmp/matplotlib"
+os.makedirs("/tmp/matplotlib", exist_ok=True)
+
+# 2) 백엔드 지정 (GUI 없는 서버 환경)
+import matplotlib
+matplotlib.use("Agg")
+
+# 3) 폰트 등록
+from matplotlib import font_manager as fm, rcParams
+FONT_PATH = os.path.join(os.path.dirname(__file__), "fonts", "NanumGothic.ttf")
+fm.fontManager.addfont(FONT_PATH)
+rcParams["font.family"] = fm.FontProperties(fname=FONT_PATH).get_name()
+rcParams["axes.unicode_minus"] = False  # 음수 기호 깨짐 방지
+
+# 이제야 안전하게 pyplot을 불러옵니다
+import matplotlib.pyplot as plt
+# ===============================================================
+
+
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sqlite3
@@ -1177,3 +1203,4 @@ elif menu == "📈 시계열 수익률":
             
     except Exception as e:
         st.error(f"운용사 목록 조회 중 오류 발생: {e}")
+
