@@ -11,16 +11,6 @@ import os
 import matplotlib.font_manager as fm
 import platform
 
-# 운영체제별 한글 폰트 설정
-if platform.system() == 'Windows':
-    plt.rcParams['font.family'] = ['Malgun Gothic', 'DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
-elif platform.system() == 'Darwin':  # macOS
-    plt.rcParams['font.family'] = ['AppleGothic', 'DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
-else:  # Linux
-    plt.rcParams['font.family'] = ['NanumGothic', 'DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
-
-plt.rcParams['axes.unicode_minus'] = False
-
 # 한글 폰트 확인 및 설정
 def set_korean_font():
     """한글 폰트를 설정하는 함수"""
@@ -30,6 +20,8 @@ def set_korean_font():
         if os.path.exists(github_font_path):
             font_prop = fm.FontProperties(fname=github_font_path)
             plt.rcParams['font.family'] = font_prop.get_name()
+            plt.rcParams['font.size'] = 10
+            plt.rcParams['axes.unicode_minus'] = False
             st.info("✅ GitHub fonts 디렉토리의 NanumGothic 폰트를 사용합니다.")
             return
         
@@ -39,6 +31,8 @@ def set_korean_font():
             if os.path.exists(font_path):
                 font_prop = fm.FontProperties(fname=font_path)
                 plt.rcParams['font.family'] = font_prop.get_name()
+                plt.rcParams['font.size'] = 10
+                plt.rcParams['axes.unicode_minus'] = False
                 st.info("✅ Windows 시스템 폰트를 사용합니다.")
                 return
         # 3. macOS의 경우
@@ -47,6 +41,8 @@ def set_korean_font():
             if os.path.exists(font_path):
                 font_prop = fm.FontProperties(fname=font_path)
                 plt.rcParams['font.family'] = font_prop.get_name()
+                plt.rcParams['font.size'] = 10
+                plt.rcParams['axes.unicode_minus'] = False
                 st.info("✅ macOS 시스템 폰트를 사용합니다.")
                 return
         # 4. Linux의 경우
@@ -55,18 +51,60 @@ def set_korean_font():
             if os.path.exists(font_path):
                 font_prop = fm.FontProperties(fname=font_path)
                 plt.rcParams['font.family'] = font_prop.get_name()
+                plt.rcParams['font.size'] = 10
+                plt.rcParams['axes.unicode_minus'] = False
                 st.info("✅ Linux 시스템 폰트를 사용합니다.")
                 return
         
         # 5. 모든 폰트가 없는 경우 기본 설정 사용
+        plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
+        plt.rcParams['font.size'] = 10
+        plt.rcParams['axes.unicode_minus'] = False
         st.warning("⚠️ 한글 폰트를 찾을 수 없어 기본 폰트를 사용합니다.")
         
     except Exception as e:
         st.warning(f"⚠️ 폰트 설정 중 오류 발생: {e}")
-        pass  # 폰트 설정 실패 시 기본 폰트 사용
+        # 폰트 설정 실패 시 기본 설정 사용
+        plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
+        plt.rcParams['font.size'] = 10
+        plt.rcParams['axes.unicode_minus'] = False
 
 # 한글 폰트 설정 실행
 set_korean_font()
+
+# 시각화용 폰트 설정 함수
+def set_plot_font():
+    """시각화에서 사용할 폰트를 설정하는 함수"""
+    try:
+        # GitHub fonts 디렉토리의 NanumGothic.ttf 우선 사용
+        github_font_path = 'fonts/NanumGothic.ttf'
+        if os.path.exists(github_font_path):
+            font_prop = fm.FontProperties(fname=github_font_path)
+            return font_prop
+        
+        # Windows의 경우
+        if platform.system() == 'Windows':
+            font_path = 'C:/Windows/Fonts/malgun.ttf'
+            if os.path.exists(font_path):
+                return fm.FontProperties(fname=font_path)
+        
+        # macOS의 경우
+        elif platform.system() == 'Darwin':
+            font_path = '/System/Library/Fonts/AppleGothic.ttf'
+            if os.path.exists(font_path):
+                return fm.FontProperties(fname=font_path)
+        
+        # Linux의 경우
+        else:
+            font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
+            if os.path.exists(font_path):
+                return fm.FontProperties(fname=font_path)
+        
+        # 기본 폰트 반환
+        return None
+        
+    except Exception as e:
+        return None
 
 # SQLite 데이터베이스 설정
 DB_FILE = "fund_returns.db"
@@ -457,10 +495,11 @@ elif menu == "📈 수익률 분석":
                     col_name = period_mapping[selected_period]
                     
                     fig, ax = plt.subplots(figsize=(10, 6))
+                    font_prop = set_plot_font()
                     ax.hist(df_analysis[col_name].dropna(), bins=30, alpha=0.7, edgecolor='black', color='skyblue')
-                    ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12)
-                    ax.set_ylabel('빈도', fontsize=12)
-                    ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold')
+                    ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12, fontproperties=font_prop)
+                    ax.set_ylabel('빈도', fontsize=12, fontproperties=font_prop)
+                    ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
                     ax.grid(True, alpha=0.3)
                     plt.tight_layout()
                     st.pyplot(fig)
