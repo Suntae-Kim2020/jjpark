@@ -206,6 +206,11 @@ st.sidebar.subheader("💾 데이터 저장")
 if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
     st.session_state.menu = "📤 데이터 업로드"
 
+# 데이터 초기화 섹션
+st.sidebar.subheader("🗑️ 데이터 관리")
+if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
+    st.session_state.menu = "🗑️ 데이터 초기화"
+
 # 데이터 분석 섹션
 st.sidebar.subheader("📊 데이터 분석")
 col1, col2 = st.sidebar.columns(2)
@@ -1009,6 +1014,115 @@ elif menu == "📊 상품별 분석":
             
     except Exception as e:
         st.error(f"운용사 목록 조회 중 오류 발생: {e}")
+
+elif menu == "🗑️ 데이터 초기화":
+    st.title("🗑️ 데이터 초기화")
+    
+    # 경고 메시지
+    st.warning("⚠️ **주의**: 이 작업은 되돌릴 수 없습니다!")
+    st.info("데이터 초기화를 하면 모든 기존 데이터가 영구적으로 삭제됩니다.")
+    
+    # 현재 데이터 현황 표시
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 전체 레코드 수 확인
+        cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")
+        total_records = cursor.fetchone()[0]
+        
+        # 기준일별 데이터 수 확인
+        cursor.execute(f"SELECT asof_date, COUNT(*) as count FROM {TABLE_NAME} GROUP BY asof_date ORDER BY asof_date DESC")
+        date_counts = cursor.fetchall()
+        
+        conn.close()
+        
+        st.subheader("📊 현재 데이터 현황")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric("총 레코드 수", f"{total_records:,}개")
+        
+        with col2:
+            st.metric("기준일 수", f"{len(date_counts)}개")
+        
+        # 기준일별 데이터 현황
+        if date_counts:
+            st.write("**기준일별 데이터 현황:**")
+            date_df = pd.DataFrame(date_counts, columns=['기준일', '레코드 수'])
+            st.dataframe(date_df, use_container_width=True)
+        
+    except Exception as e:
+        st.error(f"데이터 현황 조회 중 오류: {e}")
+    
+    # 확인 절차
+    st.subheader("🔐 초기화 확인")
+    
+    # 1단계: 확인 체크박스
+    confirm_checkbox = st.checkbox("모든 데이터가 삭제됨을 이해합니다")
+    
+    # 2단계: 확인 텍스트 입력
+    confirm_text = st.text_input(
+        "초기화를 확인하려면 '초기화'를 입력하세요:",
+        placeholder="초기화"
+    )
+    
+    # 3단계: 초기화 버튼
+    if confirm_checkbox and confirm_text == "초기화":
+        if st.button("🗑️ 데이터 초기화 실행", type="primary", use_container_width=True):
+            try:
+                # 진행 상황 표시
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                
+                status_text.text("데이터베이스 연결 중...")
+                progress_bar.progress(20)
+                
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                
+                status_text.text("기존 데이터 삭제 중...")
+                progress_bar.progress(50)
+                
+                # 모든 데이터 삭제
+                cursor.execute(f"DELETE FROM {TABLE_NAME}")
+                deleted_count = cursor.rowcount
+                
+                status_text.text("변경사항 저장 중...")
+                progress_bar.progress(80)
+                
+                conn.commit()
+                conn.close()
+                
+                status_text.text("초기화 완료!")
+                progress_bar.progress(100)
+                
+                st.success(f"✅ 데이터 초기화 완료! (삭제된 레코드: {deleted_count:,}개)")
+                st.info("이제 새로운 데이터를 업로드할 수 있습니다.")
+                
+                # 진행 상황 초기화
+                progress_bar.empty()
+                status_text.empty()
+                
+                # 페이지 새로고침을 위한 JavaScript 실행
+                st.rerun()
+                
+            except Exception as e:
+                st.error(f"데이터 초기화 중 오류 발생: {e}")
+                st.code(traceback.format_exc())
+                
+                # 연결 정리
+                try:
+                    if cursor:
+                        cursor.close()
+                    if conn:
+                        conn.close()
+                except:
+                    pass
+    elif confirm_checkbox and confirm_text != "초기화":
+        st.error("❌ 정확히 '초기화'를 입력해주세요.")
+    elif not confirm_checkbox:
+        st.info("💡 초기화를 진행하려면 위의 확인 체크박스를 선택하고 정확한 텍스트를 입력해주세요.")
 
 elif menu == "📅 기간별 분석":
     st.title("📅 기간별 분석 (SQLite)")
