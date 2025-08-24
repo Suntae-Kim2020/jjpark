@@ -16,6 +16,7 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
 
 ### 1. OpenAI API 키 설정
 
+#### **로컬 개발용:**
 1. `config_template.py` 파일을 `config.py`로 복사합니다:
    ```bash
    cp config_template.py config.py
@@ -25,6 +26,15 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
    ```python
    OPENAI_API_KEY = 'your_actual_openai_api_key_here'
    ```
+
+#### **Streamlit Cloud 배포용:**
+1. Streamlit Cloud 대시보드에서 **"Manage app"** 클릭
+2. **"Settings"** 탭으로 이동
+3. **"Secrets"** 섹션에서 다음을 추가:
+   ```toml
+   OPENAI_API_KEY = "your_actual_openai_api_key_here"
+   ```
+4. **"Save"** 클릭
 
 ### 2. GitHub에 코드 업로드
 
