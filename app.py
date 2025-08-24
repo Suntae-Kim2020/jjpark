@@ -117,15 +117,15 @@ def get_plot_font():
 
 # OpenAI API 설정은 config.py에서 관리
 # API 키 상태 확인 및 안내
-if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here' or 'sk-proj-' in OPENAI_API_KEY:
-    st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았거나 유효하지 않습니다.\n\nAI 분석 기능을 사용하려면 `config.py`에서 유효한 API 키를 설정하세요.")
+if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
+    st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았습니다.\n\nAI 분석 기능을 사용하려면 `config.py`에서 API 키를 설정하세요.")
 
 def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 수익률"):
     """OpenAI API를 사용하여 이미지와 표를 분석하는 함수"""
     try:
         # API 키 유효성 검사
-        if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here' or 'sk-proj-' in OPENAI_API_KEY:
-            return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았거나 유효하지 않습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 API 키를 생성하세요\n2. `config.py` 파일에서 `OPENAI_API_KEY`를 업데이트하세요\n3. 애플리케이션을 재시작하세요"
+        if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
+            return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 API 키를 생성하세요\n2. `config.py` 파일에서 `OPENAI_API_KEY`를 업데이트하세요\n3. 애플리케이션을 재시작하세요"
         
         headers = {
             "Content-Type": "application/json",
