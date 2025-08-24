@@ -120,36 +120,6 @@ def get_plot_font():
 if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
     st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았습니다.\n\nAI 분석 기능을 사용하려면 Streamlit Cloud Secrets에서 API 키를 설정하세요.")
 
-# 디버깅: API 키 상태 확인 (개발 중에만 표시)
-if st.sidebar.checkbox("🔍 API 키 디버깅 모드"):
-    st.sidebar.write("**API 키 상태:**")
-    if OPENAI_API_KEY:
-        st.sidebar.write(f"✅ API 키 설정됨: {OPENAI_API_KEY[:10]}...")
-        st.sidebar.write(f"키 길이: {len(OPENAI_API_KEY)}")
-        st.sidebar.write(f"키 형식: {'sk-proj-' if 'sk-proj-' in OPENAI_API_KEY else 'sk-' if 'sk-' in OPENAI_API_KEY else '기타'}")
-    else:
-        st.sidebar.write("❌ API 키가 설정되지 않음")
-    
-    # Streamlit Secrets 확인
-    try:
-        if hasattr(st, 'secrets') and 'OPENAI_API_KEY' in st.secrets:
-            secrets_key = st.secrets['OPENAI_API_KEY']
-            st.sidebar.write(f"✅ Secrets에서 읽음: {secrets_key[:10]}...")
-            st.sidebar.write(f"Secrets 키 길이: {len(secrets_key)}")
-            st.sidebar.write(f"Secrets 키 형식: {'sk-proj-' if 'sk-proj-' in secrets_key else 'sk-' if 'sk-' in secrets_key else '기타'}")
-        else:
-            st.sidebar.write("❌ Secrets에서 API 키를 찾을 수 없음")
-    except Exception as e:
-        st.sidebar.write(f"❌ Secrets 확인 오류: {e}")
-    
-    # 환경 변수 확인
-    import os
-    env_key = os.getenv('OPENAI_API_KEY')
-    if env_key:
-        st.sidebar.write(f"✅ 환경 변수에서 읽음: {env_key[:10]}...")
-    else:
-        st.sidebar.write("❌ 환경 변수에서 API 키를 찾을 수 없음")
-
 def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 수익률"):
     """OpenAI API를 사용하여 이미지와 표를 분석하는 함수"""
     try:
