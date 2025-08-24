@@ -75,7 +75,6 @@ def setup_korean_font():
             plt.rcParams['font.family'] = font_prop.get_name()
             plt.rcParams['font.size'] = 10
             plt.rcParams['axes.unicode_minus'] = False
-            st.success("✅ NanumGothic 폰트를 사용합니다.")
             return font_prop
         
         # 2. 시스템에 설치된 한글 폰트 찾기
@@ -87,7 +86,6 @@ def setup_korean_font():
                     plt.rcParams['font.family'] = font_name
                     plt.rcParams['font.size'] = 10
                     plt.rcParams['axes.unicode_minus'] = False
-                    st.info(f"ℹ️ {font_name} 폰트를 사용합니다.")
                     return font_prop
             except:
                 continue
@@ -96,11 +94,9 @@ def setup_korean_font():
         plt.rcParams['font.family'] = ['Noto Sans KR', 'DejaVu Sans', 'Arial Unicode MS', 'Liberation Sans', 'sans-serif']
         plt.rcParams['font.size'] = 10
         plt.rcParams['axes.unicode_minus'] = False
-        st.info("ℹ️ 웹 폰트를 사용합니다.")
         return None
         
     except Exception as e:
-        st.warning(f"⚠️ 폰트 설정 중 오류: {e}")
         # 기본 설정 사용
         plt.rcParams['font.family'] = ['Noto Sans KR', 'DejaVu Sans', 'Arial Unicode MS', 'Liberation Sans', 'sans-serif']
         plt.rcParams['font.size'] = 10
@@ -234,9 +230,8 @@ def init_database():
         cursor.execute(create_table_sql)
         conn.commit()
         conn.close()
-        st.success("✅ SQLite 데이터베이스 초기화 완료")
     except Exception as e:
-        st.error(f"데이터베이스 초기화 오류: {e}")
+        pass
 
 # 데이터베이스 연결 함수
 def get_db_connection():
@@ -258,7 +253,6 @@ def execute_sql_query(query, params=None):
 
 # 데이터베이스 초기화 (강화된 보호 로직)
 if not os.path.exists(DB_FILE):
-    st.info("🆕 새로운 SQLite 데이터베이스를 생성합니다...")
     init_database()
 else:
     # DB 파일이 존재하면 테이블 존재 여부만 확인
@@ -270,24 +264,13 @@ else:
         cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{TABLE_NAME}'")
         table_exists = cursor.fetchone() is not None
         
-        if table_exists:
-            # 기존 데이터 개수 확인
-            cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")
-            data_count = cursor.fetchone()[0]
+        if not table_exists:
             conn.close()
-            
-            if data_count > 0:
-                st.success(f"✅ 기존 SQLite 데이터베이스 연결 완료 (총 {data_count:,}개 레코드)")
-            else:
-                st.info("✅ 기존 SQLite 데이터베이스 연결 완료 (데이터 없음)")
+            init_database()
         else:
             conn.close()
-            st.info("📋 테이블이 없어서 새로 생성합니다...")
-            init_database()
             
     except Exception as e:
-        st.error(f"데이터베이스 확인 중 오류: {e}")
-        st.warning("⚠️ 오류로 인해 데이터베이스를 재생성합니다...")
         init_database()
 
 # 사이드바 메뉴
