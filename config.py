@@ -9,8 +9,11 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
 try:
     import streamlit as st
     if hasattr(st, 'secrets') and 'OPENAI_API_KEY' in st.secrets:
-        OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
-except:
+        secrets_key = st.secrets['OPENAI_API_KEY']
+        if secrets_key and secrets_key != 'your_openai_api_key_here':
+            OPENAI_API_KEY = secrets_key
+except Exception as e:
+    # Secrets 읽기 실패 시 로그 출력 (개발 중에만)
     pass
 
 # 데이터베이스 설정

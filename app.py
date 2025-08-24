@@ -120,6 +120,24 @@ def get_plot_font():
 if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
     st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았습니다.\n\nAI 분석 기능을 사용하려면 Streamlit Cloud Secrets에서 API 키를 설정하세요.")
 
+# 디버깅: API 키 상태 확인 (개발 중에만 표시)
+if st.sidebar.checkbox("🔍 API 키 디버깅 모드"):
+    st.sidebar.write("**API 키 상태:**")
+    if OPENAI_API_KEY:
+        st.sidebar.write(f"✅ API 키 설정됨: {OPENAI_API_KEY[:10]}...")
+        st.sidebar.write(f"키 길이: {len(OPENAI_API_KEY)}")
+    else:
+        st.sidebar.write("❌ API 키가 설정되지 않음")
+    
+    # Streamlit Secrets 확인
+    try:
+        if hasattr(st, 'secrets') and 'OPENAI_API_KEY' in st.secrets:
+            st.sidebar.write(f"✅ Secrets에서 읽음: {st.secrets['OPENAI_API_KEY'][:10]}...")
+        else:
+            st.sidebar.write("❌ Secrets에서 API 키를 찾을 수 없음")
+    except Exception as e:
+        st.sidebar.write(f"❌ Secrets 확인 오류: {e}")
+
 def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 수익률"):
     """OpenAI API를 사용하여 이미지와 표를 분석하는 함수"""
     try:
@@ -179,7 +197,8 @@ def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 
             result = response.json()
             return result["choices"][0]["message"]["content"]
         elif response.status_code == 401:
-            return "🔐 **API 키 인증 오류**\n\nAPI 키가 유효하지 않습니다. 다음을 확인해주세요:\n\n1. API 키가 올바르게 설정되었는지 확인\n2. API 키가 만료되지 않았는지 확인\n3. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 키 생성"
+            error_detail = response.json() if response.text else {}
+            return f"🔐 **API 키 인증 오류**\n\nAPI 키가 유효하지 않습니다. 다음을 확인해주세요:\n\n1. API 키가 올바르게 설정되었는지 확인\n2. API 키가 만료되지 않았는지 확인\n3. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 키 생성\n\n**오류 상세:** {error_detail}"
         else:
             return f"API 호출 오류: {response.status_code} - {response.text}"
             
