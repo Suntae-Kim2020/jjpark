@@ -7,104 +7,108 @@ import seaborn as sns
 import sqlite3
 import os
 
-# matplotlib 한글 폰트 설정
-import matplotlib.font_manager as fm
-import platform
+# 한글 폰트 지원을 위한 CSS 스타일 추가
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
-# 한글 폰트 확인 및 설정
-def set_korean_font():
-    """한글 폰트를 설정하는 함수"""
+/* 전체 앱에 한글 폰트 적용 */
+.stApp {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', 'AppleGothic', sans-serif !important;
+}
+
+/* 모든 Streamlit 컴포넌트에 한글 폰트 적용 */
+.stMarkdown, .stText, .stButton, .stSelectbox, .stMultiselect, 
+.stDateInput, .stSlider, .stCheckbox, .stMetric, .stDataFrame,
+.stNumberInput, .stTextArea, .stFileUploader, .stProgress,
+.stExpander, .stTabs, .stSidebar, .stMain {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', 'AppleGothic', sans-serif !important;
+}
+
+/* 제목과 헤더에 한글 폰트 적용 */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', 'AppleGothic', sans-serif !important;
+}
+
+/* 테이블에 한글 폰트 적용 */
+table, th, td {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', 'AppleGothic', sans-serif !important;
+}
+
+/* 버튼과 입력 필드에 한글 폰트 적용 */
+button, input, select, textarea {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', 'AppleGothic', sans-serif !important;
+}
+
+/* 사이드바에 한글 폰트 적용 */
+.sidebar .sidebar-content {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', 'AppleGothic', sans-serif !important;
+}
+
+/* 메인 컨텐츠에 한글 폰트 적용 */
+.main .block-container {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', 'AppleGothic', sans-serif !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# matplotlib 한글 폰트 설정 (Streamlit Cloud 호환)
+import matplotlib.font_manager as fm
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Streamlit Cloud 환경에서 한글 폰트 설정
+def setup_korean_font():
+    """Streamlit Cloud 환경에서 한글 폰트를 설정하는 함수"""
     try:
         # 1. GitHub fonts 디렉토리의 NanumGothic.ttf 우선 사용
         github_font_path = 'fonts/NanumGothic.ttf'
         if os.path.exists(github_font_path):
+            # 폰트 파일을 matplotlib에 등록
+            fm.fontManager.addfont(github_font_path)
             font_prop = fm.FontProperties(fname=github_font_path)
             plt.rcParams['font.family'] = font_prop.get_name()
             plt.rcParams['font.size'] = 10
             plt.rcParams['axes.unicode_minus'] = False
-            st.info("✅ GitHub fonts 디렉토리의 NanumGothic 폰트를 사용합니다.")
-            return
-        
-        # 2. Windows의 경우
-        if platform.system() == 'Windows':
-            font_path = 'C:/Windows/Fonts/malgun.ttf'
-            if os.path.exists(font_path):
-                font_prop = fm.FontProperties(fname=font_path)
-                plt.rcParams['font.family'] = font_prop.get_name()
-                plt.rcParams['font.size'] = 10
-                plt.rcParams['axes.unicode_minus'] = False
-                st.info("✅ Windows 시스템 폰트를 사용합니다.")
-                return
-        # 3. macOS의 경우
-        elif platform.system() == 'Darwin':
-            font_path = '/System/Library/Fonts/AppleGothic.ttf'
-            if os.path.exists(font_path):
-                font_prop = fm.FontProperties(fname=font_path)
-                plt.rcParams['font.family'] = font_prop.get_name()
-                plt.rcParams['font.size'] = 10
-                plt.rcParams['axes.unicode_minus'] = False
-                st.info("✅ macOS 시스템 폰트를 사용합니다.")
-                return
-        # 4. Linux의 경우
-        else:
-            font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
-            if os.path.exists(font_path):
-                font_prop = fm.FontProperties(fname=font_path)
-                plt.rcParams['font.family'] = font_prop.get_name()
-                plt.rcParams['font.size'] = 10
-                plt.rcParams['axes.unicode_minus'] = False
-                st.info("✅ Linux 시스템 폰트를 사용합니다.")
-                return
-        
-        # 5. 모든 폰트가 없는 경우 기본 설정 사용
-        plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
-        plt.rcParams['font.size'] = 10
-        plt.rcParams['axes.unicode_minus'] = False
-        st.warning("⚠️ 한글 폰트를 찾을 수 없어 기본 폰트를 사용합니다.")
-        
-    except Exception as e:
-        st.warning(f"⚠️ 폰트 설정 중 오류 발생: {e}")
-        # 폰트 설정 실패 시 기본 설정 사용
-        plt.rcParams['font.family'] = ['DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
-        plt.rcParams['font.size'] = 10
-        plt.rcParams['axes.unicode_minus'] = False
-
-# 한글 폰트 설정 실행
-set_korean_font()
-
-# 시각화용 폰트 설정 함수
-def set_plot_font():
-    """시각화에서 사용할 폰트를 설정하는 함수"""
-    try:
-        # GitHub fonts 디렉토리의 NanumGothic.ttf 우선 사용
-        github_font_path = 'fonts/NanumGothic.ttf'
-        if os.path.exists(github_font_path):
-            font_prop = fm.FontProperties(fname=github_font_path)
+            st.success("✅ NanumGothic 폰트를 사용합니다.")
             return font_prop
         
-        # Windows의 경우
-        if platform.system() == 'Windows':
-            font_path = 'C:/Windows/Fonts/malgun.ttf'
-            if os.path.exists(font_path):
-                return fm.FontProperties(fname=font_path)
+        # 2. 시스템에 설치된 한글 폰트 찾기
+        korean_fonts = ['NanumGothic', 'Malgun Gothic', 'AppleGothic', 'Noto Sans CJK KR', 'Source Han Sans KR', 'Noto Sans KR']
+        for font_name in korean_fonts:
+            try:
+                font_prop = fm.FontProperties(family=font_name)
+                if font_prop.get_name() != 'DejaVu Sans':  # 기본 폰트가 아닌 경우
+                    plt.rcParams['font.family'] = font_name
+                    plt.rcParams['font.size'] = 10
+                    plt.rcParams['axes.unicode_minus'] = False
+                    st.info(f"ℹ️ {font_name} 폰트를 사용합니다.")
+                    return font_prop
+            except:
+                continue
         
-        # macOS의 경우
-        elif platform.system() == 'Darwin':
-            font_path = '/System/Library/Fonts/AppleGothic.ttf'
-            if os.path.exists(font_path):
-                return fm.FontProperties(fname=font_path)
-        
-        # Linux의 경우
-        else:
-            font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
-            if os.path.exists(font_path):
-                return fm.FontProperties(fname=font_path)
-        
-        # 기본 폰트 반환
+        # 3. 웹 폰트 사용 (Streamlit Cloud에서 안정적)
+        plt.rcParams['font.family'] = ['Noto Sans KR', 'DejaVu Sans', 'Arial Unicode MS', 'Liberation Sans', 'sans-serif']
+        plt.rcParams['font.size'] = 10
+        plt.rcParams['axes.unicode_minus'] = False
+        st.info("ℹ️ 웹 폰트를 사용합니다.")
         return None
         
     except Exception as e:
+        st.warning(f"⚠️ 폰트 설정 중 오류: {e}")
+        # 기본 설정 사용
+        plt.rcParams['font.family'] = ['Noto Sans KR', 'DejaVu Sans', 'Arial Unicode MS', 'Liberation Sans', 'sans-serif']
+        plt.rcParams['font.size'] = 10
+        plt.rcParams['axes.unicode_minus'] = False
         return None
+
+# 한글 폰트 설정 실행
+korean_font = setup_korean_font()
+
+# 시각화용 폰트 설정 함수
+def get_plot_font():
+    """시각화에서 사용할 폰트를 반환하는 함수"""
+    return korean_font
 
 # SQLite 데이터베이스 설정
 DB_FILE = "fund_returns.db"
@@ -495,11 +499,16 @@ elif menu == "📈 수익률 분석":
                     col_name = period_mapping[selected_period]
                     
                     fig, ax = plt.subplots(figsize=(10, 6))
-                    font_prop = set_plot_font()
+                    font_prop = get_plot_font()
                     ax.hist(df_analysis[col_name].dropna(), bins=30, alpha=0.7, edgecolor='black', color='skyblue')
-                    ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12, fontproperties=font_prop)
-                    ax.set_ylabel('빈도', fontsize=12, fontproperties=font_prop)
-                    ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                    if font_prop:
+                        ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12, fontproperties=font_prop)
+                        ax.set_ylabel('빈도', fontsize=12, fontproperties=font_prop)
+                        ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                    else:
+                        ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12)
+                        ax.set_ylabel('빈도', fontsize=12)
+                        ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold')
                     ax.grid(True, alpha=0.3)
                     plt.tight_layout()
                     st.pyplot(fig)
@@ -508,9 +517,14 @@ elif menu == "📈 수익률 분석":
                 if show_boxplot:
                     st.subheader("📦 수익률 박스플롯")
                     fig2, ax2 = plt.subplots(figsize=(12, 6))
+                    font_prop = get_plot_font()
                     df_analysis[selected_cols].boxplot(ax=ax2)
-                    ax2.set_ylabel('수익률 (%)', fontsize=12)
-                    ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold')
+                    if font_prop:
+                        ax2.set_ylabel('수익률 (%)', fontsize=12, fontproperties=font_prop)
+                        ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                    else:
+                        ax2.set_ylabel('수익률 (%)', fontsize=12)
+                        ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold')
                     ax2.tick_params(axis='x', rotation=45)
                     plt.tight_layout()
                     st.pyplot(fig2)
@@ -581,10 +595,16 @@ elif menu == "📈 수익률 분석":
             col_name = period_mapping[selected_period]
             
             fig, ax = plt.subplots(figsize=(10, 6))
+            font_prop = get_plot_font()
             ax.hist(df_analysis[col_name].dropna(), bins=30, alpha=0.7, edgecolor='black', color='skyblue')
-            ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12)
-            ax.set_ylabel('빈도', fontsize=12)
-            ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold')
+            if font_prop:
+                ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12, fontproperties=font_prop)
+                ax.set_ylabel('빈도', fontsize=12, fontproperties=font_prop)
+                ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
+            else:
+                ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12)
+                ax.set_ylabel('빈도', fontsize=12)
+                ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold')
             ax.grid(True, alpha=0.3)
             plt.tight_layout()
             st.pyplot(fig)
@@ -593,9 +613,14 @@ elif menu == "📈 수익률 분석":
         if show_boxplot:
             st.subheader("📦 수익률 박스플롯")
             fig2, ax2 = plt.subplots(figsize=(12, 6))
+            font_prop = get_plot_font()
             df_analysis[selected_cols].boxplot(ax=ax2)
-            ax2.set_ylabel('수익률 (%)', fontsize=12)
-            ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold')
+            if font_prop:
+                ax2.set_ylabel('수익률 (%)', fontsize=12, fontproperties=font_prop)
+                ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
+            else:
+                ax2.set_ylabel('수익률 (%)', fontsize=12)
+                ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold')
             ax2.tick_params(axis='x', rotation=45)
             plt.tight_layout()
             st.pyplot(fig2)
@@ -680,10 +705,16 @@ elif menu == "🏢 운용사별 분석":
                 if show_product_count:
                     st.subheader("📊 운용사별 상품 수")
                     fig1, ax1 = plt.subplots(figsize=(12, 6))
+                    font_prop = get_plot_font()
                     df_manager_sorted.head(top_n).plot(x='manager', y='product_count', kind='bar', ax=ax1, color='skyblue')
-                    ax1.set_xlabel('운용사', fontsize=12)
-                    ax1.set_ylabel('상품 수', fontsize=12)
-                    ax1.set_title(f'운용사별 상품 수 (상위 {top_n}개)', fontsize=14, fontweight='bold')
+                    if font_prop:
+                        ax1.set_xlabel('운용사', fontsize=12, fontproperties=font_prop)
+                        ax1.set_ylabel('상품 수', fontsize=12, fontproperties=font_prop)
+                        ax1.set_title(f'운용사별 상품 수 (상위 {top_n}개)', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                    else:
+                        ax1.set_xlabel('운용사', fontsize=12)
+                        ax1.set_ylabel('상품 수', fontsize=12)
+                        ax1.set_title(f'운용사별 상품 수 (상위 {top_n}개)', fontsize=14, fontweight='bold')
                     ax1.tick_params(axis='x', rotation=45)
                     plt.tight_layout()
                     st.pyplot(fig1)
@@ -692,12 +723,19 @@ elif menu == "🏢 운용사별 분석":
                 if show_returns:
                     st.subheader("📈 운용사별 평균 수익률")
                     fig2, ax2 = plt.subplots(figsize=(12, 6))
+                    font_prop = get_plot_font()
                     df_manager_sorted.head(top_n).plot(x='manager', y=['avg_1y_return', 'avg_3y_return'], kind='bar', ax=ax2)
-                    ax2.set_xlabel('운용사', fontsize=12)
-                    ax2.set_ylabel('평균 수익률 (%)', fontsize=12)
-                    ax2.set_title(f'운용사별 평균 수익률 (상위 {top_n}개)', fontsize=14, fontweight='bold')
+                    if font_prop:
+                        ax2.set_xlabel('운용사', fontsize=12, fontproperties=font_prop)
+                        ax2.set_ylabel('평균 수익률 (%)', fontsize=12, fontproperties=font_prop)
+                        ax2.set_title(f'운용사별 평균 수익률 (상위 {top_n}개)', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                        ax2.legend(['1년 수익률', '3년 수익률'], fontsize=10, prop=font_prop)
+                    else:
+                        ax2.set_xlabel('운용사', fontsize=12)
+                        ax2.set_ylabel('평균 수익률 (%)', fontsize=12)
+                        ax2.set_title(f'운용사별 평균 수익률 (상위 {top_n}개)', fontsize=14, fontweight='bold')
+                        ax2.legend(['1년 수익률', '3년 수익률'], fontsize=10)
                     ax2.tick_params(axis='x', rotation=45)
-                    ax2.legend(['1년 수익률', '3년 수익률'], fontsize=10)
                     plt.tight_layout()
                     st.pyplot(fig2)
                 
@@ -705,10 +743,16 @@ elif menu == "🏢 운용사별 분석":
                 if show_assets:
                     st.subheader("💰 운용사별 총 자산")
                     fig3, ax3 = plt.subplots(figsize=(12, 6))
+                    font_prop = get_plot_font()
                     df_manager_sorted.head(top_n).plot(x='manager', y='total_assets', kind='bar', ax=ax3, color='green')
-                    ax3.set_xlabel('운용사', fontsize=12)
-                    ax3.set_ylabel('총 자산 (원)', fontsize=12)
-                    ax3.set_title(f'운용사별 총 자산 (상위 {top_n}개)', fontsize=14, fontweight='bold')
+                    if font_prop:
+                        ax3.set_xlabel('운용사', fontsize=12, fontproperties=font_prop)
+                        ax3.set_ylabel('총 자산 (원)', fontsize=12, fontproperties=font_prop)
+                        ax3.set_title(f'운용사별 총 자산 (상위 {top_n}개)', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                    else:
+                        ax3.set_xlabel('운용사', fontsize=12)
+                        ax3.set_ylabel('총 자산 (원)', fontsize=12)
+                        ax3.set_title(f'운용사별 총 자산 (상위 {top_n}개)', fontsize=14, fontweight='bold')
                     ax3.tick_params(axis='x', rotation=45)
                     plt.tight_layout()
                     st.pyplot(fig3)
@@ -848,11 +892,15 @@ elif menu == "📊 상품별 분석":
                                 numeric_cols = ['r_1m', 'r_3m', 'r_6m', 'r_1y', 'r_2y', 'r_3y', 'since_inception']
                                 
                                 fig, ax = plt.subplots(figsize=(14, 8))
+                                font_prop = get_plot_font()
                                 sns.heatmap(df_products_sorted[numeric_cols].T, 
                                           annot=True, fmt='.2f', cmap='RdYlGn', 
                                           xticklabels=df_products_sorted['product_name'],
                                           yticklabels=numeric_cols)
-                                ax.set_title(f'{selected_manager} 상품별 수익률 히트맵', fontsize=14, fontweight='bold')
+                                if font_prop:
+                                    ax.set_title(f'{selected_manager} 상품별 수익률 히트맵', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                                else:
+                                    ax.set_title(f'{selected_manager} 상품별 수익률 히트맵', fontsize=14, fontweight='bold')
                                 plt.xticks(rotation=45, ha='right')
                                 plt.tight_layout()
                                 st.pyplot(fig)
@@ -904,10 +952,16 @@ elif menu == "📊 상품별 분석":
                             except ImportError:
                                 # Plotly가 없는 경우 matplotlib 사용
                                 fig2, ax2 = plt.subplots(figsize=(14, 8))
+                                font_prop = get_plot_font()
                                 bars = ax2.bar(range(len(df_products_sorted)), df_products_sorted['total_amount'], color='orange', alpha=0.7)
-                                ax2.set_xlabel('상품명', fontsize=12)
-                                ax2.set_ylabel('자산 규모 (원)', fontsize=12)
-                                ax2.set_title(f'{selected_manager} 상품별 자산 규모', fontsize=14, fontweight='bold')
+                                if font_prop:
+                                    ax2.set_xlabel('상품명', fontsize=12, fontproperties=font_prop)
+                                    ax2.set_ylabel('자산 규모 (원)', fontsize=12, fontproperties=font_prop)
+                                    ax2.set_title(f'{selected_manager} 상품별 자산 규모', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                                else:
+                                    ax2.set_xlabel('상품명', fontsize=12)
+                                    ax2.set_ylabel('자산 규모 (원)', fontsize=12)
+                                    ax2.set_title(f'{selected_manager} 상품별 자산 규모', fontsize=14, fontweight='bold')
                                 
                                 # x축 레이블 설정
                                 ax2.set_xticks(range(len(df_products_sorted)))
@@ -1009,10 +1063,16 @@ elif menu == "📅 기간별 분석":
                 if show_product_trend and "상품 수" in analysis_metrics:
                     st.subheader("📈 기간별 상품 수 변화")
                     fig1, ax1 = plt.subplots(figsize=(12, 6))
+                    font_prop = get_plot_font()
                     ax1.plot(df_timeline['asof_date'], df_timeline['product_count'], marker='o', linewidth=2, markersize=6, color='blue')
-                    ax1.set_xlabel('날짜', fontsize=12)
-                    ax1.set_ylabel('상품 수', fontsize=12)
-                    ax1.set_title('기간별 상품 수 변화', fontsize=14, fontweight='bold')
+                    if font_prop:
+                        ax1.set_xlabel('날짜', fontsize=12, fontproperties=font_prop)
+                        ax1.set_ylabel('상품 수', fontsize=12, fontproperties=font_prop)
+                        ax1.set_title('기간별 상품 수 변화', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                    else:
+                        ax1.set_xlabel('날짜', fontsize=12)
+                        ax1.set_ylabel('상품 수', fontsize=12)
+                        ax1.set_title('기간별 상품 수 변화', fontsize=14, fontweight='bold')
                     ax1.grid(True, alpha=0.3)
                     plt.xticks(rotation=45)
                     plt.tight_layout()
@@ -1022,14 +1082,21 @@ elif menu == "📅 기간별 분석":
                 if show_return_trend and "평균 수익률" in analysis_metrics:
                     st.subheader("📊 기간별 평균 수익률 변화")
                     fig2, ax2 = plt.subplots(figsize=(12, 6))
+                    font_prop = get_plot_font()
                     ax2.plot(df_timeline['asof_date'], df_timeline['avg_1m_return'], label='1개월', marker='o', linewidth=2)
                     ax2.plot(df_timeline['asof_date'], df_timeline['avg_3m_return'], label='3개월', marker='s', linewidth=2)
                     ax2.plot(df_timeline['asof_date'], df_timeline['avg_6m_return'], label='6개월', marker='^', linewidth=2)
                     ax2.plot(df_timeline['asof_date'], df_timeline['avg_1y_return'], label='1년', marker='d', linewidth=2)
-                    ax2.set_xlabel('날짜', fontsize=12)
-                    ax2.set_ylabel('평균 수익률 (%)', fontsize=12)
-                    ax2.set_title('기간별 평균 수익률 변화', fontsize=14, fontweight='bold')
-                    ax2.legend(fontsize=10)
+                    if font_prop:
+                        ax2.set_xlabel('날짜', fontsize=12, fontproperties=font_prop)
+                        ax2.set_ylabel('평균 수익률 (%)', fontsize=12, fontproperties=font_prop)
+                        ax2.set_title('기간별 평균 수익률 변화', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                        ax2.legend(fontsize=10, prop=font_prop)
+                    else:
+                        ax2.set_xlabel('날짜', fontsize=12)
+                        ax2.set_ylabel('평균 수익률 (%)', fontsize=12)
+                        ax2.set_title('기간별 평균 수익률 변화', fontsize=14, fontweight='bold')
+                        ax2.legend(fontsize=10)
                     ax2.grid(True, alpha=0.3)
                     plt.xticks(rotation=45)
                     plt.tight_layout()
@@ -1039,10 +1106,16 @@ elif menu == "📅 기간별 분석":
                 if show_asset_trend and "총 자산" in analysis_metrics:
                     st.subheader("💰 기간별 총 자산 변화")
                     fig3, ax3 = plt.subplots(figsize=(12, 6))
+                    font_prop = get_plot_font()
                     ax3.plot(df_timeline['asof_date'], df_timeline['total_assets'], marker='o', color='green', linewidth=2, markersize=6)
-                    ax3.set_xlabel('날짜', fontsize=12)
-                    ax3.set_ylabel('총 자산 (원)', fontsize=12)
-                    ax3.set_title('기간별 총 자산 변화', fontsize=14, fontweight='bold')
+                    if font_prop:
+                        ax3.set_xlabel('날짜', fontsize=12, fontproperties=font_prop)
+                        ax3.set_ylabel('총 자산 (원)', fontsize=12, fontproperties=font_prop)
+                        ax3.set_title('기간별 총 자산 변화', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                    else:
+                        ax3.set_xlabel('날짜', fontsize=12)
+                        ax3.set_ylabel('총 자산 (원)', fontsize=12)
+                        ax3.set_title('기간별 총 자산 변화', fontsize=14, fontweight='bold')
                     ax3.grid(True, alpha=0.3)
                     plt.xticks(rotation=45)
                     plt.tight_layout()
@@ -1184,6 +1257,7 @@ elif menu == "📈 시계열 수익률":
                                         st.subheader(f"📈 {period} 수익률 시계열")
                                         
                                         fig, ax = plt.subplots(figsize=(14, 8))
+                                        font_prop = get_plot_font()
                                         
                                         # 개별 상품 라인
                                         if show_individual_lines:
@@ -1201,12 +1275,18 @@ elif menu == "📈 시계열 수익률":
                                                    marker='s', linewidth=3, markersize=6, 
                                                    label='평균', color='red', linestyle='--')
                                         
-                                        ax.set_xlabel('날짜', fontsize=12)
-                                        ax.set_ylabel(f'{period} 수익률 (%)', fontsize=12)
-                                        ax.set_title(f'{selected_manager} - {period} 수익률 시계열', fontsize=14, fontweight='bold')
-                                        
-                                        if show_legend:
-                                            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+                                        if font_prop:
+                                            ax.set_xlabel('날짜', fontsize=12, fontproperties=font_prop)
+                                            ax.set_ylabel(f'{period} 수익률 (%)', fontsize=12, fontproperties=font_prop)
+                                            ax.set_title(f'{selected_manager} - {period} 수익률 시계열', fontsize=14, fontweight='bold', fontproperties=font_prop)
+                                            if show_legend:
+                                                ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10, prop=font_prop)
+                                        else:
+                                            ax.set_xlabel('날짜', fontsize=12)
+                                            ax.set_ylabel(f'{period} 수익률 (%)', fontsize=12)
+                                            ax.set_title(f'{selected_manager} - {period} 수익률 시계열', fontsize=14, fontweight='bold')
+                                            if show_legend:
+                                                ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
                                         
                                         ax.grid(True, alpha=0.3)
                                         plt.xticks(rotation=45)
