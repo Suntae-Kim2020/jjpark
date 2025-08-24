@@ -10,6 +10,7 @@ import requests
 import json
 import base64
 from io import BytesIO
+from config import *
 
 # 한글 폰트 지원을 위한 CSS 스타일 추가
 st.markdown("""
@@ -114,12 +115,18 @@ def get_plot_font():
     """시각화에서 사용할 폰트를 반환하는 함수"""
     return korean_font
 
-# OpenAI API 설정
-OPENAI_API_KEY = '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'
+# OpenAI API 설정은 config.py에서 관리
+# API 키 상태 확인 및 안내
+if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here' or 'sk-proj-' in OPENAI_API_KEY:
+    st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았거나 유효하지 않습니다.\n\nAI 분석 기능을 사용하려면 `config.py`에서 유효한 API 키를 설정하세요.")
 
 def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 수익률"):
     """OpenAI API를 사용하여 이미지와 표를 분석하는 함수"""
     try:
+        # API 키 유효성 검사
+        if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here' or 'sk-proj-' in OPENAI_API_KEY:
+            return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았거나 유효하지 않습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 API 키를 생성하세요\n2. `config.py` 파일에서 `OPENAI_API_KEY`를 업데이트하세요\n3. 애플리케이션을 재시작하세요"
+        
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {OPENAI_API_KEY}"
@@ -156,10 +163,10 @@ def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 
             })
         
         payload = {
-            "model": "gpt-4o",
+            "model": OPENAI_MODEL,
             "messages": messages,
-            "max_tokens": 1000,
-            "temperature": 0.3
+            "max_tokens": OPENAI_MAX_TOKENS,
+            "temperature": OPENAI_TEMPERATURE
         }
         
         response = requests.post(
@@ -171,6 +178,8 @@ def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 
         if response.status_code == 200:
             result = response.json()
             return result["choices"][0]["message"]["content"]
+        elif response.status_code == 401:
+            return "🔐 **API 키 인증 오류**\n\nAPI 키가 유효하지 않습니다. 다음을 확인해주세요:\n\n1. API 키가 올바르게 설정되었는지 확인\n2. API 키가 만료되지 않았는지 확인\n3. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 키 생성"
         else:
             return f"API 호출 오류: {response.status_code} - {response.text}"
             
@@ -194,9 +203,7 @@ def save_plot_as_base64(fig):
         st.error(f"이미지 변환 오류: {e}")
         return None
 
-# SQLite 데이터베이스 설정
-DB_FILE = "fund_returns.db"
-TABLE_NAME = "fund_returns"
+# SQLite 데이터베이스 설정은 config.py에서 관리
 
 # 데이터베이스 초기화 함수
 def init_database():

@@ -1,0 +1,38 @@
+# API 키 설정 파일
+config.py
+
+# 데이터베이스 파일
+*.db
+*.sqlite
+*.sqlite3
+
+# Python 캐시 파일
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 환경 변수 파일
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE 설정 파일
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.temp
