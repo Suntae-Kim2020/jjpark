@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sqlite3
 import os
+import requests
+import json
+import base64
+from io import BytesIO
 
 # 한글 폰트 지원을 위한 CSS 스타일 추가
 st.markdown("""
@@ -109,6 +113,86 @@ korean_font = setup_korean_font()
 def get_plot_font():
     """시각화에서 사용할 폰트를 반환하는 함수"""
     return korean_font
+
+# OpenAI API 설정
+OPENAI_API_KEY = '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'
+
+def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 수익률"):
+    """OpenAI API를 사용하여 이미지와 표를 분석하는 함수"""
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {OPENAI_API_KEY}"
+        }
+        
+        # 메시지 구성
+        messages = [
+            {
+                "role": "system",
+                "content": f"당신은 금융 데이터 분석 전문가입니다. {analysis_type} 차트와 표를 분석하여 한국어로 명확하고 전문적인 해석을 제공해주세요. 주요 인사이트, 트렌드, 패턴을 중심으로 분석해주세요."
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"다음 {analysis_type} 차트와 표를 분석해주세요. 주요 인사이트, 트렌드, 패턴을 한국어로 설명해주세요."
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{image_base64}"
+                        }
+                    }
+                ]
+            }
+        ]
+        
+        # 표 데이터가 있으면 추가
+        if table_data is not None:
+            messages[1]["content"].append({
+                "type": "text",
+                "text": f"\n\n표 데이터:\n{table_data}"
+            })
+        
+        payload = {
+            "model": "gpt-4o",
+            "messages": messages,
+            "max_tokens": 1000,
+            "temperature": 0.3
+        }
+        
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=payload
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            return f"API 호출 오류: {response.status_code} - {response.text}"
+            
+    except Exception as e:
+        return f"분석 중 오류 발생: {str(e)}"
+
+def save_plot_as_base64(fig):
+    """matplotlib 그래프를 base64로 인코딩하는 함수"""
+    try:
+        # 그래프를 바이트로 저장
+        buffer = BytesIO()
+        fig.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
+        buffer.seek(0)
+        
+        # base64로 인코딩
+        image_base64 = base64.b64encode(buffer.getvalue()).decode()
+        buffer.close()
+        
+        return image_base64
+    except Exception as e:
+        st.error(f"이미지 변환 오류: {e}")
+        return None
 
 # SQLite 데이터베이스 설정
 DB_FILE = "fund_returns.db"
@@ -1406,6 +1490,24 @@ elif menu == "📈 시계열 수익률":
                                         plt.xticks(rotation=45)
                                         plt.tight_layout()
                                         st.pyplot(fig)
+                                        
+                                        # OpenAI API로 그래프 분석
+                                        with st.spinner("🤖 AI가 그래프를 분석하고 있습니다..."):
+                                            try:
+                                                # 그래프를 base64로 변환
+                                                image_base64 = save_plot_as_base64(fig)
+                                                if image_base64:
+                                                    # OpenAI API 호출
+                                                    analysis_result = analyze_with_openai(
+                                                        image_base64, 
+                                                        analysis_type=f"{period} 수익률 시계열"
+                                                    )
+                                                    
+                                                    # 분석 결과 표시
+                                                    st.subheader("🤖 AI 분석 결과")
+                                                    st.markdown(analysis_result)
+                                            except Exception as e:
+                                                st.error(f"AI 분석 중 오류: {e}")
                                 
                                 # 요약 통계 테이블
                                 st.subheader("📊 시계열 요약 통계")
@@ -1440,10 +1542,64 @@ elif menu == "📈 시계열 수익률":
                                             # NaN 값을 0으로 처리하여 정렬 가능하게 만듦
                                             summary_df[col] = summary_df[col].fillna(0)
                                     st.dataframe(summary_df, use_container_width=True)
+                                    
+                                    # OpenAI API로 표 분석
+                                    with st.spinner("🤖 AI가 통계 표를 분석하고 있습니다..."):
+                                        try:
+                                            # 표 데이터를 문자열로 변환
+                                            table_data = summary_df.to_string(index=False)
+                                            
+                                            # 더미 이미지 생성 (표 분석용)
+                                            fig_dummy, ax_dummy = plt.subplots(figsize=(1, 1))
+                                            ax_dummy.text(0.5, 0.5, '통계 분석', ha='center', va='center', transform=ax_dummy.transAxes)
+                                            ax_dummy.axis('off')
+                                            
+                                            # 그래프를 base64로 변환
+                                            image_base64 = save_plot_as_base64(fig_dummy)
+                                            if image_base64:
+                                                # OpenAI API 호출
+                                                analysis_result = analyze_with_openai(
+                                                    image_base64, 
+                                                    table_data=table_data,
+                                                    analysis_type="시계열 수익률 통계"
+                                                )
+                                                
+                                                # 분석 결과 표시
+                                                st.subheader("🤖 AI 통계 분석 결과")
+                                                st.markdown(analysis_result)
+                                        except Exception as e:
+                                            st.error(f"AI 분석 중 오류: {e}")
                                 
                                 # 상세 데이터 테이블
                                 st.subheader("📋 상세 시계열 데이터")
                                 st.dataframe(df_timeline, use_container_width=True)
+                                
+                                # OpenAI API로 상세 데이터 분석
+                                with st.spinner("🤖 AI가 상세 데이터를 분석하고 있습니다..."):
+                                    try:
+                                        # 상세 데이터를 문자열로 변환 (처음 10행만)
+                                        detail_data = df_timeline.head(10).to_string(index=False)
+                                        
+                                        # 더미 이미지 생성 (데이터 분석용)
+                                        fig_dummy2, ax_dummy2 = plt.subplots(figsize=(1, 1))
+                                        ax_dummy2.text(0.5, 0.5, '데이터 분석', ha='center', va='center', transform=ax_dummy2.transAxes)
+                                        ax_dummy2.axis('off')
+                                        
+                                        # 그래프를 base64로 변환
+                                        image_base64 = save_plot_as_base64(fig_dummy2)
+                                        if image_base64:
+                                            # OpenAI API 호출
+                                            analysis_result = analyze_with_openai(
+                                                image_base64, 
+                                                table_data=detail_data,
+                                                analysis_type="시계열 상세 데이터"
+                                            )
+                                            
+                                            # 분석 결과 표시
+                                            st.subheader("🤖 AI 상세 데이터 분석 결과")
+                                            st.markdown(analysis_result)
+                                    except Exception as e:
+                                        st.error(f"AI 분석 중 오류: {e}")
                                 
                             else:
                                 st.warning("선택한 조건에 해당하는 데이터가 없습니다.")
