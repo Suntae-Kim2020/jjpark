@@ -210,7 +210,7 @@ def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 
             return result["choices"][0]["message"]["content"]
         elif response.status_code == 401:
             error_detail = response.json() if response.text else {}
-            return f"🔐 **API 키 인증 오류**\n\nAPI 키가 유효하지 않습니다. 다음을 확인해주세요:\n\n1. API 키가 올바르게 설정되었는지 확인\n2. API 키가 만료되지 않았는지 확인\n3. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 키 생성\n4. `sk-proj-` 형식의 키는 프로젝트 기반 키로, 일반 API 키(`sk-`로 시작)를 사용하세요\n\n**오류 상세:** {error_detail}\n\n**현재 API 키:** {OPENAI_API_KEY[:10] if OPENAI_API_KEY else 'None'}..."
+            return f"🔐 **API 키 인증 오류**\n\nAPI 키가 유효하지 않습니다. 다음을 확인해주세요:\n\n1. API 키가 올바르게 설정되었는지 확인\n2. API 키가 만료되지 않았는지 확인\n3. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 키 생성\n4. API 키에 충분한 크레딧이 있는지 확인\n5. 프로젝트 설정에서 API 키가 활성화되어 있는지 확인\n\n**오류 상세:** {error_detail}\n\n**현재 API 키:** {OPENAI_API_KEY[:10] if OPENAI_API_KEY else 'None'}..."
         else:
             return f"API 호출 오류: {response.status_code} - {response.text}"
             
