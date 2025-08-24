@@ -25,25 +25,44 @@ plt.rcParams['axes.unicode_minus'] = False
 def set_korean_font():
     """한글 폰트를 설정하는 함수"""
     try:
-        # Windows의 경우
+        # 1. GitHub fonts 디렉토리의 NanumGothic.ttf 우선 사용
+        github_font_path = 'fonts/NanumGothic.ttf'
+        if os.path.exists(github_font_path):
+            font_prop = fm.FontProperties(fname=github_font_path)
+            plt.rcParams['font.family'] = font_prop.get_name()
+            st.info("✅ GitHub fonts 디렉토리의 NanumGothic 폰트를 사용합니다.")
+            return
+        
+        # 2. Windows의 경우
         if platform.system() == 'Windows':
             font_path = 'C:/Windows/Fonts/malgun.ttf'
             if os.path.exists(font_path):
                 font_prop = fm.FontProperties(fname=font_path)
                 plt.rcParams['font.family'] = font_prop.get_name()
-        # macOS의 경우
+                st.info("✅ Windows 시스템 폰트를 사용합니다.")
+                return
+        # 3. macOS의 경우
         elif platform.system() == 'Darwin':
             font_path = '/System/Library/Fonts/AppleGothic.ttf'
             if os.path.exists(font_path):
                 font_prop = fm.FontProperties(fname=font_path)
                 plt.rcParams['font.family'] = font_prop.get_name()
-        # Linux의 경우
+                st.info("✅ macOS 시스템 폰트를 사용합니다.")
+                return
+        # 4. Linux의 경우
         else:
             font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
             if os.path.exists(font_path):
                 font_prop = fm.FontProperties(fname=font_path)
                 plt.rcParams['font.family'] = font_prop.get_name()
-    except:
+                st.info("✅ Linux 시스템 폰트를 사용합니다.")
+                return
+        
+        # 5. 모든 폰트가 없는 경우 기본 설정 사용
+        st.warning("⚠️ 한글 폰트를 찾을 수 없어 기본 폰트를 사용합니다.")
+        
+    except Exception as e:
+        st.warning(f"⚠️ 폰트 설정 중 오류 발생: {e}")
         pass  # 폰트 설정 실패 시 기본 폰트 사용
 
 # 한글 폰트 설정 실행
@@ -103,24 +122,38 @@ def execute_sql_query(query, params=None):
     finally:
         conn.close()
 
-# 데이터베이스 초기화 (DB 파일이 존재하지 않을 때만)
+# 데이터베이스 초기화 (강화된 보호 로직)
 if not os.path.exists(DB_FILE):
+    st.info("🆕 새로운 SQLite 데이터베이스를 생성합니다...")
     init_database()
 else:
     # DB 파일이 존재하면 테이블 존재 여부만 확인
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+        
+        # 테이블 존재 여부 확인
         cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{TABLE_NAME}'")
         table_exists = cursor.fetchone() is not None
-        conn.close()
         
-        if not table_exists:
-            init_database()
+        if table_exists:
+            # 기존 데이터 개수 확인
+            cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")
+            data_count = cursor.fetchone()[0]
+            conn.close()
+            
+            if data_count > 0:
+                st.success(f"✅ 기존 SQLite 데이터베이스 연결 완료 (총 {data_count:,}개 레코드)")
+            else:
+                st.info("✅ 기존 SQLite 데이터베이스 연결 완료 (데이터 없음)")
         else:
-            st.success("✅ 기존 SQLite 데이터베이스 연결 완료")
+            conn.close()
+            st.info("📋 테이블이 없어서 새로 생성합니다...")
+            init_database()
+            
     except Exception as e:
         st.error(f"데이터베이스 확인 중 오류: {e}")
+        st.warning("⚠️ 오류로 인해 데이터베이스를 재생성합니다...")
         init_database()
 
 # 사이드바 메뉴
