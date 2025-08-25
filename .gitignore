@@ -1,5 +1,6 @@
 # API 키 설정 파일 (로컬 개발용)
 # config.py
+.streamlit/secrets.toml
 
 # 데이터베이스 파일
 *.db

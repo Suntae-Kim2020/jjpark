@@ -16,25 +16,33 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
 
 ### 1. OpenAI API 키 설정
 
-#### **로컬 개발용:**
-1. `config_template.py` 파일을 `config.py`로 복사합니다:
-   ```bash
-   cp config_template.py config.py
-   ```
-
-2. `config.py` 파일을 열고 OpenAI API 키를 설정합니다:
-   ```python
-   OPENAI_API_KEY = 'your_actual_openai_api_key_here'
-   ```
-
-#### **Streamlit Cloud 배포용:**
+#### **Streamlit Cloud 배포용 (권장):**
 1. Streamlit Cloud 대시보드에서 **"Manage app"** 클릭
 2. **"Settings"** 탭으로 이동
 3. **"Secrets"** 섹션에서 다음을 추가:
    ```toml
    OPENAI_API_KEY = "your_actual_openai_api_key_here"
+   OPENAI_API_USE_PW = "bslee73"
    ```
 4. **"Save"** 클릭
+
+#### **로컬 개발용:**
+1. `.streamlit/secrets.toml` 파일을 생성하고 다음을 추가:
+   ```toml
+   OPENAI_API_KEY = "your_actual_openai_api_key_here"
+   OPENAI_API_USE_PW = "bslee73"
+   ```
+
+2. 또는 환경 변수로 설정:
+   ```bash
+   # Windows
+   set OPENAI_API_KEY=your_actual_openai_api_key_here
+   set OPENAI_API_USE_PW=bslee73
+   
+   # Linux/Mac
+   export OPENAI_API_KEY=your_actual_openai_api_key_here
+   export OPENAI_API_USE_PW=bslee73
+   ```
 
 ### 2. GitHub에 코드 업로드
 
@@ -57,14 +65,15 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
 
 ```
 ├── app.py                 # 메인 애플리케이션 파일
-├── config.py              # API 키 및 설정 파일 (Git에서 제외)
-├── config_template.py     # 설정 파일 템플릿
+├── config.py              # API 키 및 설정 파일 (Streamlit Secrets 우선 사용)
 ├── requirements.txt       # Python 패키지 의존성
 ├── .gitignore            # Git 제외 파일 목록
 ├── .streamlit/
-│   └── config.toml       # Streamlit 설정
+│   ├── config.toml       # Streamlit 설정
+│   └── secrets.toml      # 로컬 개발용 Secrets (Git에서 제외)
 ├── fonts/
 │   └── NanumGothic.ttf   # 한글 폰트 파일
+├── API_KEY_MANAGEMENT.md  # API 키 관리 가이드
 └── README.md             # 이 파일
 ```
 
@@ -91,5 +100,6 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
 - Streamlit Cloud에서는 파일 시스템 접근이 제한적일 수 있습니다
 - 한글 폰트가 제대로 표시되지 않는 경우 웹 폰트로 자동 전환됩니다
 - 대용량 데이터 처리 시 시간이 걸릴 수 있습니다
-- OpenAI API 키는 절대 공개 저장소에 업로드하지 마세요
+- **OpenAI API 키는 Streamlit Cloud Secrets에만 설정하고 절대 코드에 하드코딩하지 마세요**
 - API 사용량에 따라 비용이 발생할 수 있습니다
+- AI 분석 기능 사용 시 패스워드 "bslee73"이 필요합니다
