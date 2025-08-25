@@ -275,6 +275,12 @@ else:
     except Exception as e:
         init_database()
 
+# 기본 메뉴 설정 (사이드바 메뉴보다 먼저 정의)
+if 'menu' not in st.session_state:
+    st.session_state.menu = "🏠 메인 화면"
+
+menu = st.session_state.menu
+
 # 사이드바 메뉴
 st.sidebar.title("📊 과학기술공제회 펀드상품 AI분석")
 
@@ -411,12 +417,6 @@ if st.session_state.get('menu') == "📈 시계열 수익률":
         # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
         st.session_state.ai_password_input = ""
         st.session_state.ai_analysis_verified = False
-
-# 기본 메뉴 설정
-if 'menu' not in st.session_state:
-    st.session_state.menu = "🏠 메인 화면"
-
-menu = st.session_state.menu
 
 # 메인 화면 (기본 페이지)
 if menu == "🏠 메인 화면":
