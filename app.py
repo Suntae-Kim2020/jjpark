@@ -331,11 +331,10 @@ if st.session_state.get('menu') == "📈 시계열 수익률":
                 st.session_state.ai_analysis_verified = True
             else:
                 st.sidebar.error("❌ 패스워드가 일치하지 않습니다. AI 분석이 비활성화됩니다.")
-                # 체크박스 체크 해제
-                st.session_state.ai_analysis_checkbox = False
-                st.session_state.ai_analysis_verified = False
                 st.sidebar.info("🔒 암호가 일치하지 않기 때문에 AI분석을 포함하지 않은 분석만 진행합니다.")
-                st.rerun()
+                # 체크박스 체크 해제는 다음 실행에서 처리
+                st.session_state.ai_analysis_verified = False
+                st.session_state.ai_analysis_checkbox = False
         else:
             st.sidebar.warning("⚠️ 패스워드를 입력해주세요.")
             st.session_state.ai_analysis_verified = False
