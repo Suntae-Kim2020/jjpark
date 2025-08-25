@@ -299,6 +299,10 @@ with col2:
     if st.button("📅 기간별 분석", use_container_width=True):
         st.session_state.menu = "📅 기간별 분석"
 
+# 메인 화면으로 돌아가기
+if st.sidebar.button("🏠 메인 화면", use_container_width=True):
+    st.session_state.menu = "🏠 메인 화면"
+
 # 데이터 저장 섹션
 st.sidebar.subheader("💾 데이터 저장")
 if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
@@ -360,12 +364,12 @@ if st.session_state.get('menu') == "📈 시계열 수익률":
 
 # 기본 메뉴 설정
 if 'menu' not in st.session_state:
-    st.session_state.menu = "📤 데이터 업로드"
+    st.session_state.menu = "🏠 메인 화면"
 
 menu = st.session_state.menu
 
 # 메인 화면 (기본 페이지)
-if menu == "📤 데이터 업로드":
+if menu == "🏠 메인 화면":
     st.title("📊 과학기술공제회 펀드상품 AI분석")
     
     # 메인 소개 섹션
