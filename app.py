@@ -114,14 +114,16 @@ def get_plot_font():
 # OpenAI API 설정은 config.py에서 관리
 # API 키 상태 확인 및 안내
 if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
-    st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았습니다.\n\nAI 분석 기능을 사용하려면 Streamlit Cloud Secrets에서 API 키를 설정하세요.")
+    st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았습니다.\n\nAI 분석 기능을 사용하려면 config.toml 파일에서 API 키를 설정하세요.")
+else:
+    st.sidebar.success("✅ OpenAI API 키가 설정되었습니다. AI 분석 기능을 사용할 수 있습니다.")
 
 def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 수익률"):
     """OpenAI API를 사용하여 이미지와 표를 분석하는 함수"""
     try:
         # API 키 유효성 검사
         if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
-            return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 API 키를 생성하세요\n2. Streamlit Cloud Secrets에서 `OPENAI_API_KEY`를 설정하세요\n3. 애플리케이션을 재시작하세요"
+            return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 API 키를 생성하세요\n2. config.toml 파일에서 `OPENAI_API_KEY`를 설정하세요\n3. 애플리케이션을 재시작하세요"
         
         headers = {
             "Content-Type": "application/json",
@@ -306,6 +308,39 @@ with col2:
     
     if st.button("📅 기간별 분석", use_container_width=True):
         st.session_state.menu = "📅 기간별 분석"
+
+# AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
+if st.session_state.get('menu') == "📈 시계열 수익률":
+    st.sidebar.subheader("🤖 AI 분석 설정")
+    
+    # session_state 초기화
+    if 'ai_analysis_checkbox' not in st.session_state:
+        st.session_state.ai_analysis_checkbox = False
+    if 'ai_password_input' not in st.session_state:
+        st.session_state.ai_password_input = ""
+    
+    ai_analysis_enabled = st.sidebar.checkbox("AI분석 포함", value=st.session_state.ai_analysis_checkbox, key="ai_analysis_checkbox")
+    
+    # AI 분석이 체크된 경우 패스워드 확인
+    if ai_analysis_enabled:
+        password_input = st.sidebar.text_input("패스워드를 입력하세요:", type="password", key="ai_password_input")
+        
+        if password_input:
+            if password_input == OPENAI_API_USE_PW:
+                st.sidebar.success("✅ 패스워드 확인 완료! AI 분석이 활성화되었습니다.")
+                st.session_state.ai_analysis_verified = True
+            else:
+                st.sidebar.error("❌ 패스워드가 일치하지 않습니다. AI 분석이 비활성화됩니다.")
+                # 체크박스 체크 해제
+                st.session_state.ai_analysis_checkbox = False
+                st.session_state.ai_analysis_verified = False
+                st.sidebar.info("🔒 암호가 일치하지 않기 때문에 AI분석을 포함하지 않은 분석만 진행합니다.")
+                st.rerun()
+        else:
+            st.sidebar.warning("⚠️ 패스워드를 입력해주세요.")
+            st.session_state.ai_analysis_verified = False
+    else:
+        st.session_state.ai_analysis_verified = False
 
 # 기본 메뉴 설정
 if 'menu' not in st.session_state:
@@ -1340,37 +1375,9 @@ elif menu == "📅 기간별 분석":
 elif menu == "📈 시계열 수익률":
     st.title("📈 시계열 수익률 분석 (SQLite)")
     
-    # AI 분석 체크박스 추가
-    st.subheader("🤖 AI 분석 설정")
-    
-    # session_state 초기화
-    if 'ai_analysis_checkbox' not in st.session_state:
-        st.session_state.ai_analysis_checkbox = False
-    if 'ai_password_input' not in st.session_state:
-        st.session_state.ai_password_input = ""
-    
-    ai_analysis_enabled = st.sidebar.checkbox("AI분석 포함", value=st.session_state.ai_analysis_checkbox, key="ai_analysis_checkbox")
-    
-    # AI 분석이 체크된 경우 패스워드 확인
-    if ai_analysis_enabled:
-        password_input = st.sidebar.text_input("패스워드를 입력하세요:", type="password", key="ai_password_input")
-        
-        if password_input:
-            if password_input == OPENAI_API_USE_PW:
-                st.sidebar.success("✅ 패스워드 확인 완료! AI 분석이 활성화되었습니다.")
-                ai_analysis_verified = True
-            else:
-                st.sidebar.error("❌ 패스워드가 일치하지 않습니다. AI 분석이 비활성화됩니다.")
-                # 체크박스 체크 해제
-                st.session_state.ai_analysis_checkbox = False
-                ai_analysis_verified = False
-                st.info("🔒 암호가 일치하지 않기 때문에 AI분석을 포함하지 않은 분석만 진행합니다.")
-                st.rerun()
-        else:
-            st.sidebar.warning("⚠️ 패스워드를 입력해주세요.")
-            ai_analysis_verified = False
-    else:
-        ai_analysis_verified = False
+    # AI 분석 상태 가져오기 (사이드바에서 설정됨)
+    ai_analysis_enabled = st.session_state.get('ai_analysis_checkbox', False)
+    ai_analysis_verified = st.session_state.get('ai_analysis_verified', False)
     
     # 분석 옵션 설정
     st.subheader("🔧 분석 옵션 설정")
