@@ -432,11 +432,13 @@ if menu == "🏠 메인 화면":
     # 사용 안내
     st.markdown("""
     <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
-        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📋 사용 방법</h3>
+        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📋 데이터 분석 메뉴 안내</h3>
         <div style="color: #34495e; line-height: 1.8;">
-            <p><strong>1단계:</strong> 사이드바의 <strong>"📤 데이터 업로드"</strong> 버튼을 클릭하여 데이터를 업로드하세요.</p>
-            <p><strong>2단계:</strong> 사이드바의 <strong>"📊 데이터 분석"</strong> 섹션에서 원하는 분석 기능을 선택하세요.</p>
-            <p><strong>3단계:</strong> AI 분석을 원하시면 <strong>"📈 시계열 수익률"</strong> 분석에서 AI 분석 기능을 활성화하세요.</p>
+            <p><strong>📈 수익률 분석:</strong> 기간을 선택하여 전체 펀드의 수익률 분포, 통계, 순위를 분석합니다.</p>
+            <p><strong>🏢 운용사별 분석:</strong> 운용사별 상품 수, 평균 수익률, 총 자산을 비교 분석합니다.</p>
+            <p><strong>📈 시계열 수익률:</strong> 특정 운용사의 상품들을 선택하여 시간에 따른 수익률 변화를 분석합니다. AI 분석 기능을 사용할 수 있습니다.</p>
+            <p><strong>📊 상품별 분석:</strong> 선택한 운용사의 모든 상품을 수익률 히트맵과 자산 규모로 분석합니다.</p>
+            <p><strong>📅 기간별 분석:</strong> 시간에 따른 상품 수, 평균 수익률, 총 자산의 변화 추이를 분석합니다.</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
