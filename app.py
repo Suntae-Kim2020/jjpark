@@ -515,23 +515,9 @@ if menu == "🏠 메인 화면":
         current_image = image_files[image_index]
         st.image(current_image, use_container_width=True)
         
-        # JavaScript를 사용하여 이미지만 1초마다 변경 (페이지 새로고침 없이)
-        st.markdown(f"""
-        <script>
-        (function() {{
-            let imageIndex = {image_index};
-            const imageFiles = {image_files};
-            const imageElement = document.querySelector('img[src*="{image_files[0].split("/")[-1] if image_files else ""}"]');
-            
-            if (imageElement) {{
-                setInterval(function() {{
-                    imageIndex = (imageIndex + 1) % imageFiles.length;
-                    const newImagePath = imageFiles[imageIndex];
-                    imageElement.src = newImagePath;
-                }}, 1000);
-            }}
-        }})();
-        </script>
+        # 자동 새로고침을 위한 HTML meta 태그 추가 (1초마다)
+        st.markdown("""
+        <meta http-equiv="refresh" content="1">
         """, unsafe_allow_html=True)
     else:
         st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
