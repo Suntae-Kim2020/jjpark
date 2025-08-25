@@ -321,8 +321,13 @@ if st.session_state.get('admin_password_input'):
     else:
         st.session_state.admin_logged_in = False
 
-# 관리자 로그인 체크박스
-admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=st.session_state.admin_logged_in, key="admin_login_checkbox")
+# 관리자 로그인 체크박스 - 메인 화면에서는 자동으로 해제
+if menu == "🏠 메인 화면":
+    # 메인 화면에서는 관리자 로그인 상태를 자동으로 해제
+    admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=False, key="admin_login_checkbox")
+else:
+    # 다른 페이지에서는 현재 상태 유지
+    admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=st.session_state.admin_logged_in, key="admin_login_checkbox")
 
 # 관리자 로그인이 체크된 경우 패스워드 입력
 if admin_login_enabled:
@@ -335,14 +340,11 @@ if admin_login_enabled:
         else:
             st.sidebar.error("❌ 관리자 패스워드가 일치하지 않습니다.")
             st.session_state.admin_logged_in = False
-            # 패스워드 입력 필드 초기화
-            st.session_state.admin_password_input = ""
     else:
         st.sidebar.warning("⚠️ 관리자 패스워드를 입력해주세요.")
         st.session_state.admin_logged_in = False
 else:
-    # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
-    st.session_state.admin_password_input = ""
+    # 체크박스가 해제된 경우 로그인 상태 해제
     st.session_state.admin_logged_in = False
 
 # 관리자 로그인 후에만 데이터 관리 메뉴 표시
@@ -418,11 +420,6 @@ menu = st.session_state.menu
 
 # 메인 화면 (기본 페이지)
 if menu == "🏠 메인 화면":
-    # 메인 화면으로 이동할 때 관리자 로그인 상태 초기화
-    if st.session_state.get('admin_logged_in', False):
-        st.session_state.admin_logged_in = False
-        st.session_state.admin_password_input = ""
-    
     st.title("📊 과학기술공제회 펀드상품 AI분석")
     
     # 메인 소개 섹션
