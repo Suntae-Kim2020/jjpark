@@ -303,15 +303,56 @@ with col2:
 if st.sidebar.button("🏠 메인 화면", use_container_width=True):
     st.session_state.menu = "🏠 메인 화면"
 
-# 데이터 저장 섹션
-st.sidebar.subheader("💾 데이터 저장")
-if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
-    st.session_state.menu = "📤 데이터 업로드"
+# 관리자 로그인 섹션
+st.sidebar.subheader("🔐 관리자 로그인")
 
-# 데이터 초기화 섹션
-st.sidebar.subheader("🗑️ 데이터 관리")
-if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
-    st.session_state.menu = "🗑️ 데이터 초기화"
+# session_state 초기화
+if 'admin_logged_in' not in st.session_state:
+    st.session_state.admin_logged_in = False
+if 'admin_password_input' not in st.session_state:
+    st.session_state.admin_password_input = ""
+
+# 관리자 로그인 상태 확인
+admin_password_verified = False
+if st.session_state.get('admin_password_input'):
+    if st.session_state.admin_password_input == ADMIN_PW:
+        admin_password_verified = True
+        st.session_state.admin_logged_in = True
+    else:
+        st.session_state.admin_logged_in = False
+
+# 관리자 로그인 체크박스
+admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=st.session_state.admin_logged_in, key="admin_login_checkbox")
+
+# 관리자 로그인이 체크된 경우 패스워드 입력
+if admin_login_enabled:
+    admin_password_input = st.sidebar.text_input("관리자 패스워드를 입력하세요:", type="password", key="admin_password_input")
+    
+    if admin_password_input:
+        if admin_password_input == ADMIN_PW:
+            st.sidebar.success("✅ 관리자 로그인 성공!")
+            st.session_state.admin_logged_in = True
+        else:
+            st.sidebar.error("❌ 관리자 패스워드가 일치하지 않습니다.")
+            st.session_state.admin_logged_in = False
+            # 패스워드 입력 필드 초기화
+            st.session_state.admin_password_input = ""
+    else:
+        st.sidebar.warning("⚠️ 관리자 패스워드를 입력해주세요.")
+        st.session_state.admin_logged_in = False
+else:
+    # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
+    st.session_state.admin_password_input = ""
+    st.session_state.admin_logged_in = False
+
+# 관리자 로그인 후에만 데이터 관리 메뉴 표시
+if st.session_state.admin_logged_in:
+    st.sidebar.subheader("💾 데이터 관리")
+    if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
+        st.session_state.menu = "📤 데이터 업로드"
+    
+    if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
+        st.session_state.menu = "🗑️ 데이터 초기화"
 
 # AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
 if st.session_state.get('menu') == "📈 시계열 수익률":

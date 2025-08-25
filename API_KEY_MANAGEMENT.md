@@ -18,6 +18,7 @@
 ```toml
 OPENAI_API_KEY = "sk-your-api-key-here"
 OPENAI_API_USE_PW = "bslee73"
+admin_pw = "your_admin_password_here"
 ```
 
 ### 2. 로컬 개발 환경에서 Secrets 테스트
@@ -26,6 +27,7 @@ OPENAI_API_USE_PW = "bslee73"
 ```toml
 OPENAI_API_KEY = "sk-your-api-key-here"
 OPENAI_API_USE_PW = "bslee73"
+admin_pw = "your_admin_password_here"
 ```
 
 ## 문제 상황
@@ -71,6 +73,7 @@ OPENAI_API_USE_PW = "bslee73"
 - **설정 방식**: Streamlit Cloud Secrets 우선 사용
 - **API 키**: Streamlit Cloud Secrets에서 `OPENAI_API_KEY` 설정
 - **패스워드**: Streamlit Cloud Secrets에서 `OPENAI_API_USE_PW` 설정 (기본값: bslee73)
+- **관리자 패스워드**: Streamlit Cloud Secrets에서 `admin_pw` 설정 (기본값: admin123)
 
 ## 다음 단계
 1. Streamlit Cloud Secrets에서 `OPENAI_API_KEY`와 `OPENAI_API_USE_PW` 설정
@@ -84,8 +87,10 @@ OPENAI_API_USE_PW = "bslee73"
 # 환경 변수 설정 (Windows)
 set OPENAI_API_KEY=sk-your-api-key-here
 set OPENAI_API_USE_PW=bslee73
+set admin_pw=your_admin_password_here
 
 # 환경 변수 설정 (Linux/Mac)
 export OPENAI_API_KEY=sk-your-api-key-here
 export OPENAI_API_USE_PW=bslee73
+export admin_pw=your_admin_password_here
 ```

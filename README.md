@@ -23,6 +23,7 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
    ```toml
    OPENAI_API_KEY = "your_actual_openai_api_key_here"
    OPENAI_API_USE_PW = "bslee73"
+   admin_pw = "your_admin_password_here"
    ```
 4. **"Save"** 클릭
 
@@ -31,6 +32,7 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
    ```toml
    OPENAI_API_KEY = "your_actual_openai_api_key_here"
    OPENAI_API_USE_PW = "bslee73"
+   admin_pw = "your_admin_password_here"
    ```
 
 2. 또는 환경 변수로 설정:
@@ -38,10 +40,12 @@ SQLite 기반의 펀드 수익률 분석 및 시각화 시스템입니다. OpenA
    # Windows
    set OPENAI_API_KEY=your_actual_openai_api_key_here
    set OPENAI_API_USE_PW=bslee73
+   set admin_pw=your_admin_password_here
    
    # Linux/Mac
    export OPENAI_API_KEY=your_actual_openai_api_key_here
    export OPENAI_API_USE_PW=bslee73
+   export admin_pw=your_admin_password_here
    ```
 
 ### 2. GitHub에 코드 업로드

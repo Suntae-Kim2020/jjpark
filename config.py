@@ -36,16 +36,25 @@ try:
         else:
             # Secrets에 없으면 config.toml에서 가져오기
             OPENAI_API_USE_PW = config_data.get('openai', {}).get('OPENAI_API_USE_PW', 'bslee73')
+        
+        # Streamlit Cloud Secrets에서 관리자 패스워드 가져오기
+        if 'admin_pw' in st.secrets:
+            ADMIN_PW = st.secrets['admin_pw']
+        else:
+            # Secrets에 없으면 환경 변수에서 가져오기
+            ADMIN_PW = os.getenv('admin_pw', 'admin123')
     else:
         # Streamlit이 없는 경우 (스크립트 실행 시)
         OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
         OPENAI_API_USE_PW = config_data.get('openai', {}).get('OPENAI_API_USE_PW', 'bslee73')
+        ADMIN_PW = os.getenv('admin_pw', 'admin123')
         
 except Exception as e:
     # Secrets 읽기 실패 시 fallback
     print(f"Error reading Streamlit secrets: {e}")
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
     OPENAI_API_USE_PW = config_data.get('openai', {}).get('OPENAI_API_USE_PW', 'bslee73')
+    ADMIN_PW = os.getenv('admin_pw', 'admin123')
 
 # 로컬 개발 환경에서 config.toml 우선 사용 (Secrets가 없는 경우)
 if OPENAI_API_KEY == 'your_openai_api_key_here' and 'openai' in config_data and 'OPENAI_API_KEY' in config_data['openai']:
