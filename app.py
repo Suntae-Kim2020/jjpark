@@ -297,6 +297,55 @@ with col1:
     
     if st.button("📈 시계열 수익률", use_container_width=True):
         st.session_state.menu = "📈 시계열 수익률"
+    
+    # AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
+    if st.session_state.get('menu') == "📈 시계열 수익률":
+        st.sidebar.subheader("🤖 AI 분석 설정")
+        
+        # session_state 초기화
+        if 'ai_analysis_checkbox' not in st.session_state:
+            st.session_state.ai_analysis_checkbox = False
+        if 'ai_password_input' not in st.session_state:
+            st.session_state.ai_password_input = ""
+        if 'ai_analysis_verified' not in st.session_state:
+            st.session_state.ai_analysis_verified = False
+        
+        # 패스워드 확인 상태 확인
+        password_verified = False
+        if st.session_state.get('ai_password_input'):
+            if st.session_state.ai_password_input == OPENAI_API_USE_PW:
+                password_verified = True
+                st.session_state.ai_analysis_verified = True
+            else:
+                # 패스워드가 틀린 경우 체크박스 해제
+                st.session_state.ai_analysis_verified = False
+        
+        # 체크박스 표시 (패스워드가 틀린 경우 자동으로 해제)
+        checkbox_value = st.session_state.ai_analysis_checkbox
+        if st.session_state.get('ai_password_input') and st.session_state.ai_password_input != OPENAI_API_USE_PW:
+            checkbox_value = False
+        
+        ai_analysis_enabled = st.sidebar.checkbox("AI분석 포함", value=checkbox_value, key="ai_analysis_checkbox")
+        
+        # AI 분석이 체크된 경우 패스워드 입력
+        if ai_analysis_enabled:
+            password_input = st.sidebar.text_input("패스워드를 입력하세요:", type="password", key="ai_password_input")
+            
+            if password_input:
+                if password_input == OPENAI_API_USE_PW:
+                    st.sidebar.success("✅ 패스워드 확인 완료! AI 분석이 활성화되었습니다.")
+                    st.session_state.ai_analysis_verified = True
+                else:
+                    st.sidebar.error("❌ 패스워드가 일치하지 않습니다.")
+                    st.sidebar.info("🔒 암호가 일치하지 않기 때문에 AI분석을 포함하지 않은 분석만 진행합니다.")
+                    # 패스워드 입력 필드 초기화
+                    st.session_state.ai_password_input = ""
+            else:
+                st.sidebar.warning("⚠️ 패스워드를 입력해주세요.")
+        else:
+            # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
+            st.session_state.ai_password_input = ""
+            st.session_state.ai_analysis_verified = False
 
 with col2:
     if st.button("📊 상품별 분석", use_container_width=True):
@@ -371,54 +420,7 @@ if st.session_state.admin_logged_in:
         st.session_state.menu = "🏠 메인 화면"
         st.rerun()
 
-# AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
-if st.session_state.get('menu') == "📈 시계열 수익률":
-    st.sidebar.subheader("🤖 AI 분석 설정")
-    
-    # session_state 초기화
-    if 'ai_analysis_checkbox' not in st.session_state:
-        st.session_state.ai_analysis_checkbox = False
-    if 'ai_password_input' not in st.session_state:
-        st.session_state.ai_password_input = ""
-    if 'ai_analysis_verified' not in st.session_state:
-        st.session_state.ai_analysis_verified = False
-    
-    # 패스워드 확인 상태 확인
-    password_verified = False
-    if st.session_state.get('ai_password_input'):
-        if st.session_state.ai_password_input == OPENAI_API_USE_PW:
-            password_verified = True
-            st.session_state.ai_analysis_verified = True
-        else:
-            # 패스워드가 틀린 경우 체크박스 해제
-            st.session_state.ai_analysis_verified = False
-    
-    # 체크박스 표시 (패스워드가 틀린 경우 자동으로 해제)
-    checkbox_value = st.session_state.ai_analysis_checkbox
-    if st.session_state.get('ai_password_input') and st.session_state.ai_password_input != OPENAI_API_USE_PW:
-        checkbox_value = False
-    
-    ai_analysis_enabled = st.sidebar.checkbox("AI분석 포함", value=checkbox_value, key="ai_analysis_checkbox")
-    
-    # AI 분석이 체크된 경우 패스워드 입력
-    if ai_analysis_enabled:
-        password_input = st.sidebar.text_input("패스워드를 입력하세요:", type="password", key="ai_password_input")
-        
-        if password_input:
-            if password_input == OPENAI_API_USE_PW:
-                st.sidebar.success("✅ 패스워드 확인 완료! AI 분석이 활성화되었습니다.")
-                st.session_state.ai_analysis_verified = True
-            else:
-                st.sidebar.error("❌ 패스워드가 일치하지 않습니다.")
-                st.sidebar.info("🔒 암호가 일치하지 않기 때문에 AI분석을 포함하지 않은 분석만 진행합니다.")
-                # 패스워드 입력 필드 초기화
-                st.session_state.ai_password_input = ""
-        else:
-            st.sidebar.warning("⚠️ 패스워드를 입력해주세요.")
-    else:
-        # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
-        st.session_state.ai_password_input = ""
-        st.session_state.ai_analysis_verified = False
+
 
 # 디버깅: 현재 메뉴 상태 표시 (개발 중에만 사용)
 st.sidebar.write(f"현재 메뉴: {menu}")
