@@ -515,14 +515,9 @@ if menu == "🏠 메인 화면":
         current_image = image_files[image_index]
         st.image(current_image, use_container_width=True)
         
-        # 자동 새로고침을 위한 JavaScript 추가
+        # 자동 새로고침을 위한 HTML meta 태그 추가
         st.markdown("""
-        <script>
-        // 1초마다 페이지 새로고침
-        setTimeout(function() {
-            window.location.reload();
-        }, 1000);
-        </script>
+        <meta http-equiv="refresh" content="1">
         """, unsafe_allow_html=True)
     else:
         st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
