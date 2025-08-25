@@ -357,11 +357,7 @@ if st.session_state.admin_logged_in:
     # 관리자 로그아웃 버튼
     st.sidebar.markdown("---")  # 구분선 추가
     if st.sidebar.button("🚪 관리자 로그아웃", use_container_width=True, type="secondary"):
-        # 관리자 로그아웃 처리
-        st.session_state.admin_logged_in = False
-        st.session_state.admin_password_input = ""
-        st.session_state.admin_login_checkbox = False
-        # 메인 화면으로 이동
+        # 관리자 로그아웃 처리 - session_state 수정 없이 메뉴만 변경
         st.session_state.menu = "🏠 메인 화면"
         st.rerun()
 
@@ -422,6 +418,11 @@ menu = st.session_state.menu
 
 # 메인 화면 (기본 페이지)
 if menu == "🏠 메인 화면":
+    # 메인 화면으로 이동할 때 관리자 로그인 상태 초기화
+    if st.session_state.get('admin_logged_in', False):
+        st.session_state.admin_logged_in = False
+        st.session_state.admin_password_input = ""
+    
     st.title("📊 과학기술공제회 펀드상품 AI분석")
     
     # 메인 소개 섹션
