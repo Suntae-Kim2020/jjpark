@@ -353,6 +353,24 @@ else:
     # 체크박스가 해제된 경우 로그인 상태 해제
     st.session_state.admin_logged_in = False
 
+# 관리자 로그인 후에만 데이터 관리 메뉴 표시
+if st.session_state.admin_logged_in:
+    st.sidebar.subheader("💾 데이터 관리")
+    if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
+        st.session_state.menu = "📤 데이터 업로드"
+        st.rerun()
+    
+    if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
+        st.session_state.menu = "🗑️ 데이터 초기화"
+        st.rerun()
+    
+    # 관리자 로그아웃 버튼
+    st.sidebar.markdown("---")  # 구분선 추가
+    if st.sidebar.button("🚪 관리자 로그아웃", use_container_width=True, type="secondary"):
+        # 관리자 로그아웃 처리 - session_state 수정 없이 메뉴만 변경
+        st.session_state.menu = "🏠 메인 화면"
+        st.rerun()
+
 # AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
 if st.session_state.get('menu') == "📈 시계열 수익률":
     st.sidebar.subheader("🤖 AI 분석 설정")
@@ -401,24 +419,6 @@ if st.session_state.get('menu') == "📈 시계열 수익률":
         # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
         st.session_state.ai_password_input = ""
         st.session_state.ai_analysis_verified = False
-
-# 관리자 로그인 후에만 데이터 관리 메뉴 표시
-if st.session_state.admin_logged_in:
-    st.sidebar.subheader("💾 데이터 관리")
-    if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
-        st.session_state.menu = "📤 데이터 업로드"
-        st.rerun()
-    
-    if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
-        st.session_state.menu = "🗑️ 데이터 초기화"
-        st.rerun()
-    
-    # 관리자 로그아웃 버튼
-    st.sidebar.markdown("---")  # 구분선 추가
-    if st.sidebar.button("🚪 관리자 로그아웃", use_container_width=True, type="secondary"):
-        # 관리자 로그아웃 처리 - session_state 수정 없이 메뉴만 변경
-        st.session_state.menu = "🏠 메인 화면"
-        st.rerun()
 
 # 디버깅: 현재 메뉴 상태 표시 (개발 중에만 사용)
 st.sidebar.write(f"현재 메뉴: {menu}")
