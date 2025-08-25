@@ -19,7 +19,6 @@ showErrorDetails = true
 [runner]
 magicEnabled = false
 
-# OpenAI API 설정
 [openai]
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"
 OPENAI_API_USE_PW = "bslee73"
