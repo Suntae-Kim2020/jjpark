@@ -514,7 +514,7 @@ if menu == "🏠 메인 화면":
         
         # 현재 이미지 표시
         current_image = image_files[image_index]
-        st.image(current_image, caption=f"이미지 {image_index + 1}/{len(image_files)}", use_column_width=True)
+        st.image(current_image, caption=f"이미지 {image_index + 1}/{len(image_files)}", use_container_width=True)
         
         # 자동 새로고침을 위한 JavaScript 추가
         st.markdown("""
