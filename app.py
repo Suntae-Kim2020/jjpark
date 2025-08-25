@@ -511,12 +511,9 @@ if menu == "🏠 메인 화면":
         current_time = int(time.time())
         image_index = current_time % len(image_files)
         
-        # 이미지 컨테이너 생성
-        image_container = st.empty()
-        
         # 현재 이미지 표시
         current_image = image_files[image_index]
-        image_container.image(current_image, use_container_width=True)
+        st.image(current_image, use_container_width=True)
         
         # 자동 새로고침을 위한 JavaScript 추가
         st.markdown("""
@@ -525,23 +522,6 @@ if menu == "🏠 메인 화면":
         setTimeout(function() {
             window.location.reload();
         }, 1000);
-        </script>
-        """, unsafe_allow_html=True)
-        
-        # 추가적인 자동 새로고침을 위한 HTML meta 태그
-        st.markdown("""
-        <meta http-equiv="refresh" content="1">
-        """, unsafe_allow_html=True)
-        
-        # Streamlit의 자동 새로고침 설정
-        st.markdown("""
-        <script>
-        // 페이지 로드 후 1초마다 자동 새로고침
-        window.onload = function() {
-            setInterval(function() {
-                window.location.reload();
-            }, 1000);
-        };
         </script>
         """, unsafe_allow_html=True)
     else:
