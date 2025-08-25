@@ -318,10 +318,24 @@ if st.session_state.get('menu') == "📈 시계열 수익률":
         st.session_state.ai_analysis_checkbox = False
     if 'ai_password_input' not in st.session_state:
         st.session_state.ai_password_input = ""
+    if 'ai_analysis_verified' not in st.session_state:
+        st.session_state.ai_analysis_verified = False
     
+    # 패스워드 확인 상태 확인
+    password_verified = False
+    if st.session_state.get('ai_password_input'):
+        if st.session_state.ai_password_input == OPENAI_API_USE_PW:
+            password_verified = True
+            st.session_state.ai_analysis_verified = True
+        else:
+            # 패스워드가 틀린 경우 체크박스 해제
+            st.session_state.ai_analysis_checkbox = False
+            st.session_state.ai_analysis_verified = False
+    
+    # 체크박스 표시
     ai_analysis_enabled = st.sidebar.checkbox("AI분석 포함", value=st.session_state.ai_analysis_checkbox, key="ai_analysis_checkbox")
     
-    # AI 분석이 체크된 경우 패스워드 확인
+    # AI 분석이 체크된 경우 패스워드 입력
     if ai_analysis_enabled:
         password_input = st.sidebar.text_input("패스워드를 입력하세요:", type="password", key="ai_password_input")
         
@@ -330,15 +344,15 @@ if st.session_state.get('menu') == "📈 시계열 수익률":
                 st.sidebar.success("✅ 패스워드 확인 완료! AI 분석이 활성화되었습니다.")
                 st.session_state.ai_analysis_verified = True
             else:
-                st.sidebar.error("❌ 패스워드가 일치하지 않습니다. AI 분석이 비활성화됩니다.")
+                st.sidebar.error("❌ 패스워드가 일치하지 않습니다.")
                 st.sidebar.info("🔒 암호가 일치하지 않기 때문에 AI분석을 포함하지 않은 분석만 진행합니다.")
-                # 체크박스 체크 해제는 다음 실행에서 처리
-                st.session_state.ai_analysis_verified = False
-                st.session_state.ai_analysis_checkbox = False
+                # 패스워드 입력 필드 초기화
+                st.session_state.ai_password_input = ""
         else:
             st.sidebar.warning("⚠️ 패스워드를 입력해주세요.")
-            st.session_state.ai_analysis_verified = False
     else:
+        # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
+        st.session_state.ai_password_input = ""
         st.session_state.ai_analysis_verified = False
 
 # 기본 메뉴 설정
