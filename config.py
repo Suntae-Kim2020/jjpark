@@ -23,17 +23,15 @@ config_data = load_config_from_toml()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
 
 # config.toml에서 API 키 가져오기 (우선순위)
-if 'OPENAI_API_KEY' in config_data:
-    toml_key = config_data['OPENAI_API_KEY']
+if 'openai' in config_data and 'OPENAI_API_KEY' in config_data['openai']:
+    toml_key = config_data['openai']['OPENAI_API_KEY']
     if toml_key and toml_key != 'your_openai_api_key_here':
         # API 키 유효성 검사 (sk- 또는 sk-proj- 모두 허용)
         if (toml_key.startswith('sk-') or toml_key.startswith('sk-proj-')) and len(toml_key) > 20:
             OPENAI_API_KEY = toml_key
-        else:
-            print(f"Warning: Invalid API key format in config.toml: {toml_key[:10]}...")
 
 # config.toml에서 패스워드 가져오기
-OPENAI_API_USE_PW = config_data.get('OPENAI_API_USE_PW', 'bslee73')
+OPENAI_API_USE_PW = config_data.get('openai', {}).get('OPENAI_API_USE_PW', 'bslee73')
 
 # Streamlit Cloud Secrets에서 API 키 가져오기 (최우선순위)
 try:
@@ -44,8 +42,6 @@ try:
             # API 키 유효성 검사 (sk- 또는 sk-proj- 모두 허용)
             if (secrets_key.startswith('sk-') or secrets_key.startswith('sk-proj-')) and len(secrets_key) > 20:
                 OPENAI_API_KEY = secrets_key
-            else:
-                print(f"Warning: Invalid API key format detected: {secrets_key[:10]}...")
 except Exception as e:
     # Secrets 읽기 실패 시 로그 출력 (개발 중에만)
     print(f"Error reading secrets: {e}")

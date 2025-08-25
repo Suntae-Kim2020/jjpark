@@ -20,5 +20,6 @@ showErrorDetails = true
 magicEnabled = false
 
 # OpenAI API 설정
+[openai]
 OPENAI_API_KEY = "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"
 OPENAI_API_USE_PW = "bslee73"
