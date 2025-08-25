@@ -1,11 +1,41 @@
 # OpenAI API 설정
 # Streamlit Cloud에서는 환경 변수로 설정
 import os
+import toml
+
+# config.toml에서 설정 읽기
+def load_config_from_toml():
+    """config.toml 파일에서 설정을 읽어오는 함수"""
+    try:
+        config_path = '.streamlit/config.toml'
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = toml.load(f)
+                return config
+    except Exception as e:
+        print(f"Error loading config.toml: {e}")
+    return {}
+
+# config.toml에서 설정 로드
+config_data = load_config_from_toml()
 
 # 환경 변수에서 API 키 가져오기 (Streamlit Cloud Secrets에서 설정)
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
 
-# Streamlit Cloud Secrets에서 API 키 가져오기 (우선순위)
+# config.toml에서 API 키 가져오기 (우선순위)
+if 'OPENAI_API_KEY' in config_data:
+    toml_key = config_data['OPENAI_API_KEY']
+    if toml_key and toml_key != 'your_openai_api_key_here':
+        # API 키 유효성 검사 (sk- 또는 sk-proj- 모두 허용)
+        if (toml_key.startswith('sk-') or toml_key.startswith('sk-proj-')) and len(toml_key) > 20:
+            OPENAI_API_KEY = toml_key
+        else:
+            print(f"Warning: Invalid API key format in config.toml: {toml_key[:10]}...")
+
+# config.toml에서 패스워드 가져오기
+OPENAI_API_USE_PW = config_data.get('OPENAI_API_USE_PW', 'bslee73')
+
+# Streamlit Cloud Secrets에서 API 키 가져오기 (최우선순위)
 try:
     import streamlit as st
     if hasattr(st, 'secrets') and 'OPENAI_API_KEY' in st.secrets:
