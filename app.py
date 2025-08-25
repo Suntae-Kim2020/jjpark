@@ -496,37 +496,37 @@ if menu == "🏠 메인 화면":
         </div>
     </div>
     """, unsafe_allow_html=True)
-     
-     # 이미지 슬라이드쇼
-     st.markdown("---")
-     
-     # images 폴더에서 이미지 파일 목록 가져오기
-     import glob
-     image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
-     image_files.sort()  # 파일명 순으로 정렬
-     
-     if image_files:
-         # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
-         import time
-         current_time = int(time.time())
-         image_index = current_time % len(image_files)
-         
-         # 현재 이미지 표시
-         current_image = image_files[image_index]
-         st.image(current_image, use_container_width=True)
-         
-         # 자동 새로고침을 위한 JavaScript 추가
-         st.markdown("""
-         <script>
-         // 1초마다 페이지 새로고침
-         setTimeout(function() {
-             window.location.reload();
-         }, 1000);
-         </script>
-         """, unsafe_allow_html=True)
-     else:
-         st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
-         st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
+    
+    # 이미지 슬라이드쇼
+    st.markdown("---")
+    
+    # images 폴더에서 이미지 파일 목록 가져오기
+    import glob
+    image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
+    image_files.sort()  # 파일명 순으로 정렬
+    
+    if image_files:
+        # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
+        import time
+        current_time = int(time.time())
+        image_index = current_time % len(image_files)
+        
+        # 현재 이미지 표시
+        current_image = image_files[image_index]
+        st.image(current_image, use_container_width=True)
+        
+        # 자동 새로고침을 위한 JavaScript 추가
+        st.markdown("""
+        <script>
+        // 1초마다 페이지 새로고침
+        setTimeout(function() {
+            window.location.reload();
+        }, 1000);
+        </script>
+        """, unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
+        st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
 
 elif menu == "📤 데이터 업로드":
     st.title("📤 데이터 업로드")
