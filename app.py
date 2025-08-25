@@ -364,6 +364,7 @@ if 'menu' not in st.session_state:
 
 menu = st.session_state.menu
 
+# 메인 화면 (기본 페이지)
 if menu == "📤 데이터 업로드":
     st.title("📊 과학기술공제회 펀드상품 AI분석")
     
@@ -423,6 +424,21 @@ if menu == "📤 데이터 업로드":
     """, unsafe_allow_html=True)
     
     st.markdown("---")
+    
+    # 사용 안내
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📋 사용 방법</h3>
+        <div style="color: #34495e; line-height: 1.8;">
+            <p><strong>1단계:</strong> 사이드바의 <strong>"📤 데이터 업로드"</strong> 버튼을 클릭하여 데이터를 업로드하세요.</p>
+            <p><strong>2단계:</strong> 사이드바의 <strong>"📊 데이터 분석"</strong> 섹션에서 원하는 분석 기능을 선택하세요.</p>
+            <p><strong>3단계:</strong> AI 분석을 원하시면 <strong>"📈 시계열 수익률"</strong> 분석에서 AI 분석 기능을 활성화하세요.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+elif menu == "📤 데이터 업로드":
+    st.title("📤 데이터 업로드")
     
     # 데이터 업로드 섹션
     st.subheader("📤 데이터 업로드")
