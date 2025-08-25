@@ -376,13 +376,8 @@ if st.session_state.get('admin_password_input'):
     else:
         st.session_state.admin_logged_in = False
 
-# 관리자 로그인 체크박스 - 메인 화면에서는 자동으로 해제
-if menu == "🏠 메인 화면":
-    # 메인 화면에서는 관리자 로그인 상태를 자동으로 해제
-    admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=False, key="admin_login_checkbox")
-else:
-    # 다른 페이지에서는 현재 상태 유지
-    admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=st.session_state.admin_logged_in, key="admin_login_checkbox")
+# 관리자 로그인 체크박스 - 현재 상태 유지
+admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=st.session_state.admin_logged_in, key="admin_login_checkbox")
 
 # 관리자 로그인이 체크된 경우 패스워드 입력
 if admin_login_enabled:
@@ -416,7 +411,9 @@ if st.session_state.admin_logged_in:
     # 관리자 로그아웃 버튼
     st.sidebar.markdown("---")  # 구분선 추가
     if st.sidebar.button("🚪 관리자 로그아웃", use_container_width=True, type="secondary"):
-        # 관리자 로그아웃 처리 - session_state 수정 없이 메뉴만 변경
+        # 관리자 로그아웃 처리 - AI 분석 설정 상태는 유지하고 관리자 관련 상태만 초기화
+        st.session_state.admin_logged_in = False
+        st.session_state.admin_password_input = ""
         st.session_state.menu = "🏠 메인 화면"
         st.rerun()
 
@@ -499,6 +496,41 @@ if menu == "🏠 메인 화면":
         </div>
     </div>
     """, unsafe_allow_html=True)
+     
+    # 이미지 슬라이드쇼
+    st.markdown("---")
+    st.subheader("🖼️ 이미지 갤러리")
+    
+    # images 폴더에서 이미지 파일 목록 가져오기
+    import glob
+    image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
+    image_files.sort()  # 파일명 순으로 정렬
+    
+    if image_files:
+        # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
+        import time
+        current_time = int(time.time())
+        image_index = current_time % len(image_files)
+        
+        # 현재 이미지 표시
+        current_image = image_files[image_index]
+        st.image(current_image, caption=f"이미지 {image_index + 1}/{len(image_files)}", use_column_width=True)
+        
+        # 자동 새로고침을 위한 JavaScript 추가
+        st.markdown("""
+        <script>
+        // 1초마다 페이지 새로고침
+        setTimeout(function() {
+            window.location.reload();
+        }, 1000);
+        </script>
+        """, unsafe_allow_html=True)
+        
+        # 이미지 정보 표시
+        st.info(f"📁 총 {len(image_files)}개의 이미지가 있습니다. 1초마다 자동으로 변경됩니다.")
+    else:
+        st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
+        st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
 
 elif menu == "📤 데이터 업로드":
     st.title("📤 데이터 업로드")
