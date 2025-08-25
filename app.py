@@ -353,6 +353,17 @@ if st.session_state.admin_logged_in:
     
     if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
         st.session_state.menu = "🗑️ 데이터 초기화"
+    
+    # 관리자 로그아웃 버튼
+    st.sidebar.markdown("---")  # 구분선 추가
+    if st.sidebar.button("🚪 관리자 로그아웃", use_container_width=True, type="secondary"):
+        # 관리자 로그아웃 처리
+        st.session_state.admin_logged_in = False
+        st.session_state.admin_password_input = ""
+        st.session_state.admin_login_checkbox = False
+        # 메인 화면으로 이동
+        st.session_state.menu = "🏠 메인 화면"
+        st.rerun()
 
 # AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
 if st.session_state.get('menu') == "📈 시계열 수익률":
