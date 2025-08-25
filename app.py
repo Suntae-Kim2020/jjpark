@@ -276,19 +276,9 @@ else:
         init_database()
 
 # 사이드바 메뉴
-st.sidebar.title("📊 Fund Returns 시스템 (SQLite)")
+st.sidebar.title("📊 과학기술공제회 펀드상품 AI분석")
 
-# 데이터 저장 섹션
-st.sidebar.subheader("💾 데이터 저장")
-if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
-    st.session_state.menu = "📤 데이터 업로드"
-
-# 데이터 초기화 섹션
-st.sidebar.subheader("🗑️ 데이터 관리")
-if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
-    st.session_state.menu = "🗑️ 데이터 초기화"
-
-# 데이터 분석 섹션
+# 데이터 분석 섹션 (맨 위로 이동)
 st.sidebar.subheader("📊 데이터 분석")
 col1, col2 = st.sidebar.columns(2)
 
@@ -308,6 +298,16 @@ with col2:
     
     if st.button("📅 기간별 분석", use_container_width=True):
         st.session_state.menu = "📅 기간별 분석"
+
+# 데이터 저장 섹션
+st.sidebar.subheader("💾 데이터 저장")
+if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
+    st.session_state.menu = "📤 데이터 업로드"
+
+# 데이터 초기화 섹션
+st.sidebar.subheader("🗑️ 데이터 관리")
+if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
+    st.session_state.menu = "🗑️ 데이터 초기화"
 
 # AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
 if st.session_state.get('menu') == "📈 시계열 수익률":
@@ -365,7 +365,67 @@ if 'menu' not in st.session_state:
 menu = st.session_state.menu
 
 if menu == "📤 데이터 업로드":
-    st.title("📊 Fund Returns 업로드 시스템 (SQLite)")
+    st.title("📊 과학기술공제회 펀드상품 AI분석")
+    
+    # 메인 소개 섹션
+    st.markdown("---")
+    
+    # 첫 번째 소개 문단
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 15px; color: white; margin-bottom: 2rem;">
+        <h2 style="color: white; margin-bottom: 1rem;">🎯 펀드 선택, 더 이상 복잡하게 고민하지 마세요</h2>
+        <p style="font-size: 1.1rem; line-height: 1.6;">
+            AI가 과거 데이터부터 최신 추세까지 정밀 분석해, 과학기술공제회 펀드 상품의 장점과 리스크를 한눈에 보여드립니다. 
+            투자자는 중요한 판단에만 집중할 수 있습니다.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 두 번째 소개 문단
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 2rem; border-radius: 15px; color: white; margin-bottom: 2rem;">
+        <h2 style="color: white; margin-bottom: 1rem;">💡 실제 투자자를 위한 맞춤형 분석</h2>
+        <p style="font-size: 1.1rem; line-height: 1.6;">
+            우리의 AI 분석 서비스는 단순한 수치 나열을 넘어, 실제 투자자가 이해하기 쉽게 핵심 포인트를 정리해 드립니다. 
+            안정성과 성장성을 함께 확인하며, 더 똑똑하고 더 자신 있는 투자를 경험해 보세요.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 서비스 특징
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 2rem; border-radius: 15px; color: white; margin-bottom: 2rem;">
+        <h2 style="color: white; margin-bottom: 1.5rem;">🚀 우리 서비스의 특징</h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-size: 1.5rem;">🤖</span>
+                <div>
+                    <strong>AI 기반 분석</strong><br>
+                    <span style="font-size: 0.95rem;">펀드 성과·위험·추세를 데이터로 파악</span>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-size: 1.5rem;">🎯</span>
+                <div>
+                    <strong>맞춤형 인사이트</strong><br>
+                    <span style="font-size: 0.95rem;">이용자 관심사에 맞춘 핵심 정보 제공</span>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-size: 1.5rem;">🛡️</span>
+                <div>
+                    <strong>신뢰와 혁신</strong><br>
+                    <span style="font-size: 0.95rem;">과학기술공제회와 AI의 결합으로 더 안전한 투자 지원</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # 데이터 업로드 섹션
+    st.subheader("📤 데이터 업로드")
     
     # 날짜 선택
     asof_date = st.date_input("업로드 기준일 (asof_date)을 선택하세요:")
