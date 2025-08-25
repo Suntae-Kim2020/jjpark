@@ -125,9 +125,6 @@ def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 
         if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
             return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 API 키를 생성하세요\n2. config.toml 파일에서 `OPENAI_API_KEY`를 설정하세요\n3. 애플리케이션을 재시작하세요"
         
-        # 임시로 API 키 검증을 우회하고 더미 응답 반환
-        # TODO: 실제 OpenAI API 키가 유효해지면 아래 주석을 해제하고 사용
-        """
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {OPENAI_API_KEY}"
@@ -184,74 +181,6 @@ def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 
             return f"🔐 **API 키 인증 오류**\n\nAPI 키가 유효하지 않습니다. 다음을 확인해주세요:\n\n1. API 키가 올바르게 설정되었는지 확인\n2. API 키가 만료되지 않았는지 확인\n3. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 새로운 키 생성\n4. API 키에 충분한 크레딧이 있는지 확인\n5. 프로젝트 설정에서 API 키가 활성화되어 있는지 확인\n\n**오류 상세:** {error_detail}\n\n**현재 API 키:** {OPENAI_API_KEY[:10] if OPENAI_API_KEY else 'None'}..."
         else:
             return f"API 호출 오류: {response.status_code} - {response.text}"
-        """
-        
-        # 임시 더미 응답 (API 키 문제 해결 전까지)
-        if "시계열" in analysis_type:
-            return f"""🤖 **AI 분석 결과 ({analysis_type})**
-
-이 시계열 데이터를 분석한 결과 다음과 같은 인사이트를 얻을 수 있습니다:
-
-**📈 주요 트렌드:**
-- 데이터의 전반적인 추세를 관찰할 수 있습니다
-- 특정 기간에 변동성이 증가하는 패턴이 보입니다
-- 장기적인 성장 또는 하락 추세가 나타납니다
-
-**📊 패턴 분석:**
-- 계절성 패턴이 일부 관찰됩니다
-- 특정 이벤트나 시점에서 급격한 변화가 발생했습니다
-- 전반적으로 안정적인 성장을 보여주고 있습니다
-
-**💡 투자 인사이트:**
-- 리스크 관리가 중요한 시점입니다
-- 분산 투자를 통한 포트폴리오 최적화를 권장합니다
-- 정기적인 모니터링이 필요합니다
-
-*참고: 이는 임시 분석 결과입니다. 실제 OpenAI API가 정상 작동하면 더 정확한 분석을 제공할 수 있습니다.*"""
-        
-        elif "통계" in analysis_type:
-            return f"""🤖 **AI 통계 분석 결과**
-
-통계 데이터를 분석한 결과 다음과 같은 특징을 발견했습니다:
-
-**📊 수치적 특징:**
-- 평균값을 중심으로 한 분포를 보입니다
-- 표준편차를 통해 변동성을 확인할 수 있습니다
-- 최대값과 최소값의 차이로 범위를 파악할 수 있습니다
-
-**📈 성과 지표:**
-- 상위 성과 상품들의 특징을 분석할 수 있습니다
-- 하위 성과 상품들과의 차이점을 비교할 수 있습니다
-- 전체적인 성과 분포를 이해할 수 있습니다
-
-**💡 전략적 제안:**
-- 성과가 우수한 상품들의 공통점을 찾아보세요
-- 리스크 대비 수익률을 고려한 투자 전략을 수립하세요
-- 정기적인 성과 리뷰를 통해 포트폴리오를 최적화하세요
-
-*참고: 이는 임시 분석 결과입니다. 실제 OpenAI API가 정상 작동하면 더 정확한 분석을 제공할 수 있습니다.*"""
-        
-        else:
-            return f"""🤖 **AI 분석 결과**
-
-{analysis_type} 데이터를 분석한 결과 다음과 같은 인사이트를 얻을 수 있습니다:
-
-**📊 주요 발견사항:**
-- 데이터에서 의미 있는 패턴을 발견했습니다
-- 특정 트렌드나 변화점을 식별할 수 있습니다
-- 전반적인 성과와 개별 요소들의 관계를 파악할 수 있습니다
-
-**💡 실무적 제안:**
-- 발견된 패턴을 활용한 전략 수립을 권장합니다
-- 정기적인 모니터링과 분석을 통해 지속적인 개선을 추진하세요
-- 리스크 관리와 수익 극대화의 균형을 고려하세요
-
-**🔍 추가 분석 필요사항:**
-- 더 상세한 분석을 위해 추가 데이터가 필요할 수 있습니다
-- 특정 기간이나 조건에 대한 심화 분석을 고려해보세요
-- 외부 요인과의 연관성 분석도 유용할 것입니다
-
-*참고: 이는 임시 분석 결과입니다. 실제 OpenAI API가 정상 작동하면 더 정확한 분석을 제공할 수 있습니다.*"""
             
     except Exception as e:
         return f"분석 중 오류 발생: {str(e)}"
