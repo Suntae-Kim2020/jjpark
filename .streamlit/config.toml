@@ -20,5 +20,5 @@ showErrorDetails = true
 magicEnabled = false
 
 [openai]
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"
 OPENAI_API_USE_PW = "bslee73"
