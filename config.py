@@ -26,9 +26,7 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
 if 'openai' in config_data and 'OPENAI_API_KEY' in config_data['openai']:
     toml_key = config_data['openai']['OPENAI_API_KEY']
     if toml_key and toml_key != 'your_openai_api_key_here':
-        # API 키 유효성 검사 (sk- 또는 sk-proj- 모두 허용)
-        if (toml_key.startswith('sk-') or toml_key.startswith('sk-proj-')) and len(toml_key) > 20:
-            OPENAI_API_KEY = toml_key
+        OPENAI_API_KEY = toml_key
 
 # config.toml에서 패스워드 가져오기
 OPENAI_API_USE_PW = config_data.get('openai', {}).get('OPENAI_API_USE_PW', 'bslee73')
@@ -39,9 +37,7 @@ try:
     if hasattr(st, 'secrets') and 'OPENAI_API_KEY' in st.secrets:
         secrets_key = st.secrets['OPENAI_API_KEY']
         if secrets_key and secrets_key != 'your_openai_api_key_here':
-            # API 키 유효성 검사 (sk- 또는 sk-proj- 모두 허용)
-            if (secrets_key.startswith('sk-') or secrets_key.startswith('sk-proj-')) and len(secrets_key) > 20:
-                OPENAI_API_KEY = secrets_key
+            OPENAI_API_KEY = secrets_key
 except Exception as e:
     # Secrets 읽기 실패 시 로그 출력 (개발 중에만)
     print(f"Error reading secrets: {e}")
