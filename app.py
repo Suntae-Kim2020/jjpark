@@ -497,21 +497,17 @@ if menu == "🏠 메인 화면":
     </div>
     """, unsafe_allow_html=True)
     
-    # 이미지 슬라이드쇼 (강제 갱신 + 디버깅)
-    from streamlit_autorefresh import st_autorefresh
+    # 이미지 슬라이드쇼 (Streamlit Cloud 호환)
     import time, glob, os
-
-    # 1초마다 전체 스크립트 재실행
-    st_autorefresh(interval=1000, key="image_slideshow_auto")
-
+    
     # 이미지 목록 조회
     image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
     image_files.sort()
 
-    placeholder = st.empty()  # 항상 새로 그리도록 슬롯 사용
-
     if image_files:
-        idx = int(time.time()) % len(image_files)
+        # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
+        current_time = int(time.time())
+        idx = current_time % len(image_files)
         current_image = image_files[idx]
 
         # 파일 변경 감지용 mtime
@@ -524,16 +520,22 @@ if menu == "🏠 메인 화면":
         with open(current_image, "rb") as f:
             img_bytes = f.read()
 
-        # ▲ Streamlit이 같은 바이트면 최적화로 화면 갱신을 건너뛰는 경우 방지: 
-        #    placeholder로 매번 다시 그리기 + 캡션에 mtime/tick 노출
-        placeholder.image(
+        # 이미지 표시 (캡션에 디버깅 정보 포함)
+        st.image(
             img_bytes,
             use_container_width=True,
-            caption=f"이미지 {idx + 1}/{len(image_files)} • {os.path.basename(current_image)} • mtime={int(mtime)} • tick={int(time.time())}"
+            caption=f"이미지 {idx + 1}/{len(image_files)} • {os.path.basename(current_image)} • tick={current_time}"
         )
 
-        # 필요 시 디버깅 라벨 표시
-        # st.write({"len": len(image_files), "file": current_image, "mtime": mtime, "tick": int(time.time())})
+        # Streamlit Cloud에서 자동 새로고침을 위한 JavaScript
+        st.markdown(f"""
+        <script>
+        // 1초마다 페이지 새로고침
+        setTimeout(function() {{
+            window.location.reload();
+        }}, 1000);
+        </script>
+        """, unsafe_allow_html=True)
 
     else:
         st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
