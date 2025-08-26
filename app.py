@@ -506,19 +506,39 @@ if menu == "🏠 메인 화면":
     image_files.sort()  # 파일명 순으로 정렬
     
     if image_files:
-        # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
+        # session_state에서 이미지 인덱스 관리
+        if 'image_slideshow_index' not in st.session_state:
+            st.session_state.image_slideshow_index = 0
+        
+        # 현재 이미지 표시 (캐시 버스팅을 위해 타임스탬프 추가)
         import time
-        current_time = int(time.time())
-        image_index = current_time % len(image_files)
+        current_image = image_files[st.session_state.image_slideshow_index]
+        timestamp = int(time.time())
         
-        # 현재 이미지 표시
-        current_image = image_files[image_index]
-        st.image(current_image, use_container_width=True)
+        # 이미지 URL에 타임스탬프를 추가하여 캐시 버스팅
+        st.image(f"{current_image}?t={timestamp}", use_container_width=True)
         
-        # 자동 새로고침을 위한 HTML meta 태그 추가 (1초마다)
-        st.markdown("""
-        <meta http-equiv="refresh" content="1">
+        # 1초 후 다음 이미지로 변경
+        if st.button("🔄 다음 이미지", key="next_image_button", use_container_width=True):
+            st.session_state.image_slideshow_index = (st.session_state.image_slideshow_index + 1) % len(image_files)
+            st.rerun()
+        
+        # 자동 슬라이드쇼를 위한 JavaScript (1초마다 버튼 클릭)
+        st.markdown(f"""
+        <script>
+        // 1초마다 자동으로 다음 이미지 버튼 클릭
+        setTimeout(function() {{
+            const button = document.querySelector('button[data-testid="stButton"]');
+            if (button) {{
+                button.click();
+            }}
+        }}, 1000);
+        </script>
         """, unsafe_allow_html=True)
+        
+        # 이미지 정보 표시
+        st.caption(f"이미지 {st.session_state.image_slideshow_index + 1}/{len(image_files)}")
+        
     else:
         st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
         st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
