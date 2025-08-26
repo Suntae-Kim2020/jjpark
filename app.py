@@ -505,6 +505,7 @@ if menu == "🏠 메인 화면":
         from streamlit_autorefresh import st_autorefresh
         import time
         import glob
+        import os
         
         # 1초(1000ms)마다 스크립트 재실행
         st_autorefresh(interval=1000, key="image_slideshow_auto")
@@ -514,24 +515,21 @@ if menu == "🏠 메인 화면":
         image_files.sort()  # 파일명 순으로 정렬
         
         if image_files:
-            # session_state에서 이미지 인덱스 관리
-            if 'image_slideshow_index' not in st.session_state:
-                st.session_state.image_slideshow_index = 0
+            # 1) 인덱스는 시간으로 계산 (1초마다 변경)
+            idx = int(time.time()) % len(image_files)
+            current_image = image_files[idx]
             
-            # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
-            current_time = int(time.time())
-            image_index = current_time % len(image_files)
-            st.session_state.image_slideshow_index = image_index
+            # 2) 로컬 파일은 바이트로 읽어서 표시 (캐시 우회)
+            #    파일이 덮어써질 수 있으니 mtime을 읽어 '변화'를 감지
+            mtime = os.path.getmtime(current_image)
+            with open(current_image, "rb") as f:
+                img_bytes = f.read()
             
-            # 현재 이미지 표시 (캐시 버스팅을 위해 타임스탬프 추가)
-            current_image = image_files[image_index]
-            timestamp = int(time.time())
+            # 3) 캐시 혼동 방지를 위해 항상 바이트를 직접 전달
+            st.image(img_bytes, use_container_width=True, caption=f"이미지 {idx + 1}/{len(image_files)}")
             
-            # 이미지 URL에 타임스탬프를 추가하여 캐시 버스팅
-            st.image(f"{current_image}?t={timestamp}", use_container_width=True)
-            
-            # 이미지 정보 표시
-            st.caption(f"이미지 {image_index + 1}/{len(image_files)}")
+            # 디버깅용 (필요 시 주석 해제)
+            # st.write({"file": current_image, "mtime": mtime, "tick": int(time.time())})
             
         else:
             st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
@@ -543,6 +541,7 @@ if menu == "🏠 메인 화면":
         
         # 대체 방법: 수동 버튼
         import glob
+        import os
         image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
         image_files.sort()
         
@@ -551,13 +550,16 @@ if menu == "🏠 메인 화면":
                 st.session_state.image_slideshow_index = 0
             
             current_image = image_files[st.session_state.image_slideshow_index]
-            st.image(current_image, use_container_width=True)
+            
+            # 로컬 파일은 바이트로 읽어서 표시
+            with open(current_image, "rb") as f:
+                img_bytes = f.read()
+            
+            st.image(img_bytes, use_container_width=True, caption=f"이미지 {st.session_state.image_slideshow_index + 1}/{len(image_files)}")
             
             if st.button("🔄 다음 이미지", use_container_width=True):
                 st.session_state.image_slideshow_index = (st.session_state.image_slideshow_index + 1) % len(image_files)
                 st.rerun()
-            
-            st.caption(f"이미지 {st.session_state.image_slideshow_index + 1}/{len(image_files)}")
         else:
             st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
             st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
