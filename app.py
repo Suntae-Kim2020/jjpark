@@ -500,48 +500,67 @@ if menu == "🏠 메인 화면":
     # 이미지 슬라이드쇼
     st.markdown("---")
     
-    # images 폴더에서 이미지 파일 목록 가져오기
-    import glob
-    image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
-    image_files.sort()  # 파일명 순으로 정렬
-    
-    if image_files:
-        # session_state에서 이미지 인덱스 관리
-        if 'image_slideshow_index' not in st.session_state:
-            st.session_state.image_slideshow_index = 0
-        
-        # 현재 이미지 표시 (캐시 버스팅을 위해 타임스탬프 추가)
+    # streamlit-autorefresh 라이브러리 사용
+    try:
+        from streamlit_autorefresh import st_autorefresh
         import time
-        current_image = image_files[st.session_state.image_slideshow_index]
-        timestamp = int(time.time())
+        import glob
         
-        # 이미지 URL에 타임스탬프를 추가하여 캐시 버스팅
-        st.image(f"{current_image}?t={timestamp}", use_container_width=True)
+        # 1초(1000ms)마다 스크립트 재실행
+        st_autorefresh(interval=1000, key="image_slideshow_auto")
         
-        # 1초 후 다음 이미지로 변경
-        if st.button("🔄 다음 이미지", key="next_image_button", use_container_width=True):
-            st.session_state.image_slideshow_index = (st.session_state.image_slideshow_index + 1) % len(image_files)
-            st.rerun()
+        # images 폴더에서 이미지 파일 목록 가져오기
+        image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
+        image_files.sort()  # 파일명 순으로 정렬
         
-        # 자동 슬라이드쇼를 위한 JavaScript (1초마다 버튼 클릭)
-        st.markdown(f"""
-        <script>
-        // 1초마다 자동으로 다음 이미지 버튼 클릭
-        setTimeout(function() {{
-            const button = document.querySelector('button[data-testid="stButton"]');
-            if (button) {{
-                button.click();
-            }}
-        }}, 1000);
-        </script>
-        """, unsafe_allow_html=True)
+        if image_files:
+            # session_state에서 이미지 인덱스 관리
+            if 'image_slideshow_index' not in st.session_state:
+                st.session_state.image_slideshow_index = 0
+            
+            # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
+            current_time = int(time.time())
+            image_index = current_time % len(image_files)
+            st.session_state.image_slideshow_index = image_index
+            
+            # 현재 이미지 표시 (캐시 버스팅을 위해 타임스탬프 추가)
+            current_image = image_files[image_index]
+            timestamp = int(time.time())
+            
+            # 이미지 URL에 타임스탬프를 추가하여 캐시 버스팅
+            st.image(f"{current_image}?t={timestamp}", use_container_width=True)
+            
+            # 이미지 정보 표시
+            st.caption(f"이미지 {image_index + 1}/{len(image_files)}")
+            
+        else:
+            st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
+            st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
+            
+    except ImportError:
+        st.error("⚠️ streamlit-autorefresh 라이브러리가 설치되지 않았습니다.")
+        st.info("💡 다음 명령어로 라이브러리를 설치하세요: `pip install streamlit-autorefresh`")
         
-        # 이미지 정보 표시
-        st.caption(f"이미지 {st.session_state.image_slideshow_index + 1}/{len(image_files)}")
+        # 대체 방법: 수동 버튼
+        import glob
+        image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
+        image_files.sort()
         
-    else:
-        st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
-        st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
+        if image_files:
+            if 'image_slideshow_index' not in st.session_state:
+                st.session_state.image_slideshow_index = 0
+            
+            current_image = image_files[st.session_state.image_slideshow_index]
+            st.image(current_image, use_container_width=True)
+            
+            if st.button("🔄 다음 이미지", use_container_width=True):
+                st.session_state.image_slideshow_index = (st.session_state.image_slideshow_index + 1) % len(image_files)
+                st.rerun()
+            
+            st.caption(f"이미지 {st.session_state.image_slideshow_index + 1}/{len(image_files)}")
+        else:
+            st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
+            st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
 
 elif menu == "📤 데이터 업로드":
     st.title("📤 데이터 업로드")
