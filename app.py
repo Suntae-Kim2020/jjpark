@@ -497,72 +497,47 @@ if menu == "🏠 메인 화면":
     </div>
     """, unsafe_allow_html=True)
     
-    # 이미지 슬라이드쇼
-    st.markdown("---")
-    
-    # streamlit-autorefresh 라이브러리 사용
-    try:
-        from streamlit_autorefresh import st_autorefresh
-        import time
-        import glob
-        import os
-        
-        # 1초(1000ms)마다 스크립트 재실행
-        st_autorefresh(interval=1000, key="image_slideshow_auto")
-        
-        # images 폴더에서 이미지 파일 목록 가져오기
-        image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
-        image_files.sort()  # 파일명 순으로 정렬
-        
-        if image_files:
-            # 1) 인덱스는 시간으로 계산 (1초마다 변경)
-            idx = int(time.time()) % len(image_files)
-            current_image = image_files[idx]
-            
-            # 2) 로컬 파일은 바이트로 읽어서 표시 (캐시 우회)
-            #    파일이 덮어써질 수 있으니 mtime을 읽어 '변화'를 감지
+    # 이미지 슬라이드쇼 (강제 갱신 + 디버깅)
+    from streamlit_autorefresh import st_autorefresh
+    import time, glob, os
+
+    # 1초마다 전체 스크립트 재실행
+    st_autorefresh(interval=1000, key="image_slideshow_auto")
+
+    # 이미지 목록 조회
+    image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
+    image_files.sort()
+
+    placeholder = st.empty()  # 항상 새로 그리도록 슬롯 사용
+
+    if image_files:
+        idx = int(time.time()) % len(image_files)
+        current_image = image_files[idx]
+
+        # 파일 변경 감지용 mtime
+        try:
             mtime = os.path.getmtime(current_image)
-            with open(current_image, "rb") as f:
-                img_bytes = f.read()
-            
-            # 3) 캐시 혼동 방지를 위해 항상 바이트를 직접 전달
-            st.image(img_bytes, use_container_width=True, caption=f"이미지 {idx + 1}/{len(image_files)}")
-            
-            # 디버깅용 (필요 시 주석 해제)
-            # st.write({"file": current_image, "mtime": mtime, "tick": int(time.time())})
-            
-        else:
-            st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
-            st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
-            
-    except ImportError:
-        st.error("⚠️ streamlit-autorefresh 라이브러리가 설치되지 않았습니다.")
-        st.info("💡 다음 명령어로 라이브러리를 설치하세요: `pip install streamlit-autorefresh`")
-        
-        # 대체 방법: 수동 버튼
-        import glob
-        import os
-        image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
-        image_files.sort()
-        
-        if image_files:
-            if 'image_slideshow_index' not in st.session_state:
-                st.session_state.image_slideshow_index = 0
-            
-            current_image = image_files[st.session_state.image_slideshow_index]
-            
-            # 로컬 파일은 바이트로 읽어서 표시
-            with open(current_image, "rb") as f:
-                img_bytes = f.read()
-            
-            st.image(img_bytes, use_container_width=True, caption=f"이미지 {st.session_state.image_slideshow_index + 1}/{len(image_files)}")
-            
-            if st.button("🔄 다음 이미지", use_container_width=True):
-                st.session_state.image_slideshow_index = (st.session_state.image_slideshow_index + 1) % len(image_files)
-                st.rerun()
-        else:
-            st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
-            st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
+        except FileNotFoundError:
+            mtime = 0
+
+        # 바이트로 읽어서 캐시 완전 우회
+        with open(current_image, "rb") as f:
+            img_bytes = f.read()
+
+        # ▲ Streamlit이 같은 바이트면 최적화로 화면 갱신을 건너뛰는 경우 방지: 
+        #    placeholder로 매번 다시 그리기 + 캡션에 mtime/tick 노출
+        placeholder.image(
+            img_bytes,
+            use_container_width=True,
+            caption=f"이미지 {idx + 1}/{len(image_files)} • {os.path.basename(current_image)} • mtime={int(mtime)} • tick={int(time.time())}"
+        )
+
+        # 필요 시 디버깅 라벨 표시
+        # st.write({"len": len(image_files), "file": current_image, "mtime": mtime, "tick": int(time.time())})
+
+    else:
+        st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
+        st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
 
 elif menu == "📤 데이터 업로드":
     st.title("📤 데이터 업로드")
