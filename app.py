@@ -497,45 +497,45 @@ if menu == "🏠 메인 화면":
     </div>
     """, unsafe_allow_html=True)
     
-    # 이미지 슬라이드쇼 (Streamlit Cloud 호환)
-    import time, glob, os
-    
-    # 이미지 목록 조회
-    image_files = glob.glob("images/*.png") + glob.glob("images/*.jpg") + glob.glob("images/*.jpeg")
-    image_files.sort()
+    # 이미지 슬라이드쇼 (Streamlit Cloud 호환: 1초 자동 교체)
+    from pathlib import Path
+    from streamlit_autorefresh import st_autorefresh
+    import time, os
+
+    # 1초마다 앱을 rerun (JS 금지, 공식 autorefresh 사용)
+    # limit=None 이면 무제한 반복
+    tick = st_autorefresh(interval=1000, limit=None, key="image_slideshow_auto")
+
+    # 앱 파일 기준으로 images 디렉토리 안전하게 찾기 (경로 문제 예방)
+    BASE_DIR = Path(__file__).parent
+    IMAGES_DIR = (BASE_DIR / "images").resolve()
+
+    # 지원 확장자
+    EXTS = {".png", ".jpg", ".jpeg"}
+
+    # 이미지 목록 수집
+    image_files = sorted([p for p in IMAGES_DIR.glob("*") if p.suffix.lower() in EXTS])
+
+    placeholder = st.empty()  # 렌더 스킵 방지용 슬롯
 
     if image_files:
-        # 현재 시간을 기반으로 이미지 인덱스 계산 (1초마다 변경)
-        current_time = int(time.time())
-        idx = current_time % len(image_files)
+        # st_autorefresh가 돌 때마다 tick 이 1씩 증가 → 이걸로 인덱스 계산
+        idx = (tick if tick is not None else int(time.time())) % len(image_files)
         current_image = image_files[idx]
 
-        # 파일 변경 감지용 mtime
+        # 파일 수정시간 (디버깅 및 caption 변화로 렌더 최적화 무력화)
         try:
-            mtime = os.path.getmtime(current_image)
+            mtime = int(current_image.stat().st_mtime)
         except FileNotFoundError:
             mtime = 0
 
-        # 바이트로 읽어서 캐시 완전 우회
+        # 바이트로 읽어 캐시 완전 우회 (URL 캐시 안 씀)
         with open(current_image, "rb") as f:
             img_bytes = f.read()
 
-        # 이미지 표시 (캡션에 디버깅 정보 포함)
-        st.image(
-            img_bytes,
-            use_container_width=True,
-            caption=f"이미지 {idx + 1}/{len(image_files)} • {os.path.basename(current_image)} • tick={current_time}"
-        )
-
-        # Streamlit Cloud에서 자동 새로고침을 위한 JavaScript
-        st.markdown(f"""
-        <script>
-        // 1초마다 페이지 새로고침
-        setTimeout(function() {{
-            window.location.reload();
-        }}, 1000);
-        </script>
-        """, unsafe_allow_html=True)
+        # 매번 새로 그리기: placeholder 사용 + caption에 tick/mtime 섞어서
+        caption = f"이미지 {idx + 1}/{len(image_files)} • {current_image.name} • tick={tick} • mtime={mtime}"
+        placeholder.image(img_bytes, use_container_width=True, caption=caption)
 
     else:
         st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
