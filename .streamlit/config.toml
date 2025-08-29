@@ -18,12 +18,3 @@ showErrorDetails = true
 
 [runner]
 magicEnabled = false
-
-[openai]
-# 백업용 키 (삭제된 경우 복구용)
-# OPENAI_API_KEY = "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"
-
-# 현재 사용할 키 (새로 생성한 키로 교체)
-OPENAI_API_KEY = "여기에_새로운_키를_입력하세요"
-
-OPENAI_API_USE_PW = "bslee73"
