@@ -64,7 +64,7 @@ import seaborn as sns
 
 # Streamlit Cloud 환경에서 한글 폰트 설정
 def setup_korean_font():
-    """Streamlit Cloud 환경에서 한글 퐁퐁퐁트를 설정하는 함수"""
+    """Streamlit Cloud 환경에서 한글 폰폰트를 설정하는 함수"""
     try:
         # 1. GitHub fonts 디렉토리의 NanumGothic.ttf 우선 사용
         github_font_path = 'fonts/NanumGothic.ttf'
@@ -1853,7 +1853,7 @@ elif menu == "📈 시계열 수익률":
                                 st.warning("선택한 조건에 해당하는 데이터가 없습니다.")
                                 
                         except Exception as e:
-                            st.error(f"시계열 분석 중 오류 발생생생생생: {e}")
+                            st.error(f"시계열 분석 중 오류 발생: {e}")
                 else:
                     st.warning(f"{selected_manager}의 상품 데이터가 없습니다.")
                     
