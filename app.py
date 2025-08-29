@@ -114,14 +114,16 @@ def get_plot_font():
 # OpenAI API 설정은 config.py에서 관리
 # API 키 상태 확인 및 안내
 if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
-    st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았습니다.\n\nAI 분석 기능을 사용하려면 Streamlit Cloud Secrets에서 API 키를 설정하세요.")
+            st.sidebar.warning("⚠️ OpenAI API 키가 설정되지 않았습니다.\n\nAI 분석 기능을 사용하려면 Streamlit Cloud Secrets에서 API 키를 설정하세요.")
+else:
+    st.sidebar.success("✅ OpenAI API 키가 설정되었습니다. AI 분석 기능을 사용할 수 있습니다.")
 
 def analyze_with_openai(image_base64, table_data=None, analysis_type="시계열 수익률"):
     """OpenAI API를 사용하여 이미지와 표를 분석하는 함수"""
     try:
         # API 키 유효성 검사
         if not OPENAI_API_KEY or OPENAI_API_KEY == 'your_openai_api_key_here':
-            return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 API 키를 생성하세요\n2. Streamlit Cloud Secrets에서 `OPENAI_API_KEY`를 설정하세요\n3. 애플리케이션을 재시작하세요"
+                            return "⚠️ **AI 분석 기능이 비활성화되었습니다.**\n\nAPI 키가 설정되지 않았습니다. AI 분석을 사용하려면:\n\n1. [OpenAI Platform](https://platform.openai.com/account/api-keys)에서 API 키를 생성하세요\n2. Streamlit Cloud Secrets에서 `OPENAI_API_KEY`를 설정하세요\n3. 애플리케이션을 재시작하세요"
         
         headers = {
             "Content-Type": "application/json",
@@ -273,20 +275,16 @@ else:
     except Exception as e:
         init_database()
 
+# 기본 메뉴 설정 (사이드바 메뉴보다 먼저 정의)
+if 'menu' not in st.session_state:
+    st.session_state.menu = "🏠 메인 화면"
+
+menu = st.session_state.menu
+
 # 사이드바 메뉴
-st.sidebar.title("📊 Fund Returns 시스템 (SQLite)")
+st.sidebar.title("📊 과학기술공제회 펀드상품 AI분석")
 
-# 데이터 저장 섹션
-st.sidebar.subheader("💾 데이터 저장")
-if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
-    st.session_state.menu = "📤 데이터 업로드"
-
-# 데이터 초기화 섹션
-st.sidebar.subheader("🗑️ 데이터 관리")
-if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
-    st.session_state.menu = "🗑️ 데이터 초기화"
-
-# 데이터 분석 섹션
+# 데이터 분석 섹션 (맨 위로 이동)
 st.sidebar.subheader("📊 데이터 분석")
 col1, col2 = st.sidebar.columns(2)
 
@@ -299,6 +297,55 @@ with col1:
     
     if st.button("📈 시계열 수익률", use_container_width=True):
         st.session_state.menu = "📈 시계열 수익률"
+    
+    # AI 분석 설정 섹션 (시계열 수익률 분석에서만 표시)
+    if st.session_state.get('menu') == "📈 시계열 수익률":
+        st.sidebar.subheader("🤖 AI 분석 설정")
+        
+        # session_state 초기화
+        if 'ai_analysis_checkbox' not in st.session_state:
+            st.session_state.ai_analysis_checkbox = False
+        if 'ai_password_input' not in st.session_state:
+            st.session_state.ai_password_input = ""
+        if 'ai_analysis_verified' not in st.session_state:
+            st.session_state.ai_analysis_verified = False
+        
+        # 패스워드 확인 상태 확인
+        password_verified = False
+        if st.session_state.get('ai_password_input'):
+            if st.session_state.ai_password_input == OPENAI_API_USE_PW:
+                password_verified = True
+                st.session_state.ai_analysis_verified = True
+            else:
+                # 패스워드가 틀린 경우 체크박스 해제
+                st.session_state.ai_analysis_verified = False
+        
+        # 체크박스 표시 (패스워드가 틀린 경우 자동으로 해제)
+        checkbox_value = st.session_state.ai_analysis_checkbox
+        if st.session_state.get('ai_password_input') and st.session_state.ai_password_input != OPENAI_API_USE_PW:
+            checkbox_value = False
+        
+        ai_analysis_enabled = st.sidebar.checkbox("AI분석 포함", value=checkbox_value, key="ai_analysis_checkbox")
+        
+        # AI 분석이 체크된 경우 패스워드 입력
+        if ai_analysis_enabled:
+            password_input = st.sidebar.text_input("패스워드를 입력하세요:", type="password", key="ai_password_input")
+            
+            if password_input:
+                if password_input == OPENAI_API_USE_PW:
+                    st.sidebar.success("✅ 패스워드 확인 완료! AI 분석이 활성화되었습니다.")
+                    st.session_state.ai_analysis_verified = True
+                else:
+                    st.sidebar.error("❌ 패스워드가 일치하지 않습니다.")
+                    st.sidebar.info("🔒 암호가 일치하지 않기 때문에 AI분석을 포함하지 않은 분석만 진행합니다.")
+                    # 패스워드 입력 필드 초기화
+                    st.session_state.ai_password_input = ""
+            else:
+                st.sidebar.warning("⚠️ 패스워드를 입력해주세요.")
+        else:
+            # 체크박스가 해제된 경우 패스워드 입력 필드 초기화
+            st.session_state.ai_password_input = ""
+            st.session_state.ai_analysis_verified = False
 
 with col2:
     if st.button("📊 상품별 분석", use_container_width=True):
@@ -307,14 +354,198 @@ with col2:
     if st.button("📅 기간별 분석", use_container_width=True):
         st.session_state.menu = "📅 기간별 분석"
 
-# 기본 메뉴 설정
-if 'menu' not in st.session_state:
-    st.session_state.menu = "📤 데이터 업로드"
+# 메인 화면으로 돌아가기
+if st.sidebar.button("🏠 메인 화면", use_container_width=True):
+    st.session_state.menu = "🏠 메인 화면"
 
-menu = st.session_state.menu
+# 관리자 로그인 섹션
+st.sidebar.subheader("🔐 관리자 로그인")
 
-if menu == "📤 데이터 업로드":
-    st.title("📊 Fund Returns 업로드 시스템 (SQLite)")
+# session_state 초기화
+if 'admin_logged_in' not in st.session_state:
+    st.session_state.admin_logged_in = False
+if 'admin_password_input' not in st.session_state:
+    st.session_state.admin_password_input = ""
+
+# 관리자 로그인 상태 확인
+admin_password_verified = False
+if st.session_state.get('admin_password_input'):
+    if st.session_state.admin_password_input == ADMIN_PW:
+        admin_password_verified = True
+        st.session_state.admin_logged_in = True
+    else:
+        st.session_state.admin_logged_in = False
+
+# 관리자 로그인 체크박스 - 현재 상태 유지
+admin_login_enabled = st.sidebar.checkbox("관리자 로그인", value=st.session_state.admin_logged_in, key="admin_login_checkbox")
+
+# 관리자 로그인이 체크된 경우 패스워드 입력
+if admin_login_enabled:
+    admin_password_input = st.sidebar.text_input("관리자 패스워드를 입력하세요:", type="password", key="admin_password_input")
+    
+    if admin_password_input:
+        if admin_password_input == ADMIN_PW:
+            st.sidebar.success("✅ 관리자 로그인 성공!")
+            st.session_state.admin_logged_in = True
+        else:
+            st.sidebar.error("❌ 관리자 패스워드가 일치하지 않습니다.")
+            st.session_state.admin_logged_in = False
+    else:
+        st.sidebar.warning("⚠️ 관리자 패스워드를 입력해주세요.")
+        st.session_state.admin_logged_in = False
+else:
+    # 체크박스가 해제된 경우 로그인 상태 해제
+    st.session_state.admin_logged_in = False
+
+# 관리자 로그인 후에만 데이터 관리 메뉴 표시
+if st.session_state.admin_logged_in:
+    st.sidebar.subheader("💾 데이터 관리")
+    if st.sidebar.button("📤 데이터 업로드", use_container_width=True):
+        st.session_state.menu = "📤 데이터 업로드"
+        st.rerun()
+    
+    if st.sidebar.button("🗑️ 데이터 초기화", use_container_width=True, type="secondary"):
+        st.session_state.menu = "🗑️ 데이터 초기화"
+        st.rerun()
+    
+    # 관리자 로그아웃 버튼
+    st.sidebar.markdown("---")  # 구분선 추가
+    if st.sidebar.button("🚪 관리자 로그아웃", use_container_width=True, type="secondary"):
+        # 관리자 로그아웃 처리 - AI 분석 설정 상태는 유지하고 관리자 관련 상태만 초기화
+        st.session_state.admin_logged_in = False
+        st.session_state.admin_password_input = ""
+        st.session_state.menu = "🏠 메인 화면"
+        st.rerun()
+
+
+
+# 디버깅: 현재 메뉴 상태 표시 (개발 중에만 사용)
+st.sidebar.write(f"현재 메뉴: {menu}")
+
+# 메인 화면 (기본 페이지)
+if menu == "🏠 메인 화면":
+    st.title("📊 과학기술공제회 펀드상품 AI분석")
+    
+    # 메인 소개 섹션
+    st.markdown("---")
+    
+    # 첫 번째 소개 문단
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 15px; color: white; margin-bottom: 2rem;">
+        <h2 style="color: white; margin-bottom: 1rem;">🎯 펀드 선택, 더 이상 복잡하게 고민하지 마세요</h2>
+        <p style="font-size: 1.1rem; line-height: 1.6;">
+            AI가 과거 데이터부터 최신 추세까지 정밀 분석해, 과학기술공제회 펀드 상품의 장점과 리스크를 한눈에 보여드립니다. 
+            투자자는 중요한 판단에만 집중할 수 있습니다.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 두 번째 소개 문단
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 2rem; border-radius: 15px; color: white; margin-bottom: 2rem;">
+        <h2 style="color: white; margin-bottom: 1rem;">💡 실제 투자자를 위한 맞춤형 분석</h2>
+        <p style="font-size: 1.1rem; line-height: 1.6;">
+            우리의 AI 분석 서비스는 단순한 수치 나열을 넘어, 실제 투자자가 이해하기 쉽게 핵심 포인트를 정리해 드립니다. 
+            안정성과 성장성을 함께 확인하며, 더 똑똑하고 더 자신 있는 투자를 경험해 보세요.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 서비스 특징
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 2rem; border-radius: 15px; color: white; margin-bottom: 2rem;">
+        <h2 style="color: white; margin-bottom: 1.5rem;">🚀 우리 서비스의 특징</h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-size: 1.5rem;">🤖</span>
+                <div>
+                    <strong>AI 기반 분석</strong><br>
+                    <span style="font-size: 0.95rem;">펀드 성과·위험·추세를 데이터로 파악</span>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-size: 1.5rem;">🎯</span>
+                <div>
+                    <strong>맞춤형 인사이트</strong><br>
+                    <span style="font-size: 0.95rem;">이용자 관심사에 맞춘 핵심 정보 제공</span>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-size: 1.5rem;">🛡️</span>
+                <div>
+                    <strong>신뢰와 혁신</strong><br>
+                    <span style="font-size: 0.95rem;">과학기술공제회와 AI의 결합으로 더 안전한 투자 지원</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # 사용 안내
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📋 데이터 분석 메뉴 안내</h3>
+        <div style="color: #34495e; line-height: 1.8;">
+            <p><strong>📈 수익률 분석:</strong> 기간을 선택하여 전체 펀드의 수익률 분포, 통계, 순위를 분석합니다.</p>
+            <p><strong>🏢 운용사별 분석:</strong> 운용사별 상품 수, 평균 수익률, 총 자산을 비교 분석합니다.</p>
+            <p><strong>📈 시계열 수익률:</strong> 특정 운용사의 상품들을 선택하여 시간에 따른 수익률 변화를 분석합니다. AI 분석 기능을 사용할 수 있습니다.</p>
+            <p><strong>📊 상품별 분석:</strong> 선택한 운용사의 모든 상품을 수익률 히트맵과 자산 규모로 분석합니다.</p>
+            <p><strong>📅 기간별 분석:</strong> 시간에 따른 상품 수, 평균 수익률, 총 자산의 변화 추이를 분석합니다.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 이미지 슬라이드쇼 (Streamlit Cloud 호환: 1초 자동 교체)
+    from pathlib import Path
+    from streamlit_autorefresh import st_autorefresh
+    import time, os
+
+    # 1초마다 앱을 rerun (JS 금지, 공식 autorefresh 사용)
+    # limit=None 이면 무제한 반복
+    tick = st_autorefresh(interval=1000, limit=None, key="image_slideshow_auto")
+
+    # 앱 파일 기준으로 images 디렉토리 안전하게 찾기 (경로 문제 예방)
+    BASE_DIR = Path(__file__).parent
+    IMAGES_DIR = (BASE_DIR / "images").resolve()
+
+    # 지원 확장자
+    EXTS = {".png", ".jpg", ".jpeg"}
+
+    # 이미지 목록 수집
+    image_files = sorted([p for p in IMAGES_DIR.glob("*") if p.suffix.lower() in EXTS])
+
+    placeholder = st.empty()  # 렌더 스킵 방지용 슬롯
+
+    if image_files:
+        # st_autorefresh가 돌 때마다 tick 이 1씩 증가 → 이걸로 인덱스 계산
+        idx = (tick if tick is not None else int(time.time())) % len(image_files)
+        current_image = image_files[idx]
+
+        # 파일 수정시간 (디버깅 및 caption 변화로 렌더 최적화 무력화)
+        try:
+            mtime = int(current_image.stat().st_mtime)
+        except FileNotFoundError:
+            mtime = 0
+
+        # 바이트로 읽어 캐시 완전 우회 (URL 캐시 안 씀)
+        with open(current_image, "rb") as f:
+            img_bytes = f.read()
+
+        # 매번 새로 그리기: placeholder 사용 + caption에 tick/mtime 섞어서
+        caption = f"이미지 {idx + 1}/{len(image_files)} • {current_image.name} • tick={tick} • mtime={mtime}"
+        placeholder.image(img_bytes, use_container_width=True, caption=caption)
+
+    else:
+        st.warning("⚠️ images 폴더에 이미지 파일이 없습니다.")
+        st.info("💡 PNG, JPG, JPEG 형식의 이미지를 images 폴더에 추가하세요.")
+
+elif menu == "📤 데이터 업로드":
+    st.title("📤 데이터 업로드")
+    
+    # 데이터 업로드 섹션
+    st.subheader("📤 데이터 업로드")
     
     # 날짜 선택
     asof_date = st.date_input("업로드 기준일 (asof_date)을 선택하세요:")
@@ -1340,8 +1571,16 @@ elif menu == "📅 기간별 분석":
 elif menu == "📈 시계열 수익률":
     st.title("📈 시계열 수익률 분석 (SQLite)")
     
+    # AI 분석 상태 가져오기 (사이드바에서 설정됨)
+    ai_analysis_enabled = st.session_state.get('ai_analysis_checkbox', False)
+    ai_analysis_verified = st.session_state.get('ai_analysis_verified', False)
+    
     # 분석 옵션 설정
     st.subheader("🔧 분석 옵션 설정")
+    
+    # 패스워드 확인 상태에 따른 메시지 표시
+    if ai_analysis_enabled and not ai_analysis_verified:
+        st.warning("🔒 AI 분석을 사용하려면 올바른 패스워드를 입력해주세요.")
     
     # 분석 기간 선택
     col1, col2 = st.columns(2)
@@ -1482,23 +1721,29 @@ elif menu == "📈 시계열 수익률":
                                         plt.tight_layout()
                                         st.pyplot(fig)
                                         
-                                        # OpenAI API로 그래프 분석
-                                        with st.spinner("🤖 AI가 그래프를 분석하고 있습니다..."):
-                                            try:
-                                                # 그래프를 base64로 변환
-                                                image_base64 = save_plot_as_base64(fig)
-                                                if image_base64:
-                                                    # OpenAI API 호출
-                                                    analysis_result = analyze_with_openai(
-                                                        image_base64, 
-                                                        analysis_type=f"{period} 수익률 시계열"
-                                                    )
-                                                    
-                                                    # 분석 결과 표시
-                                                    st.subheader("🤖 AI 분석 결과")
-                                                    st.markdown(analysis_result)
-                                            except Exception as e:
-                                                st.error(f"AI 분석 중 오류: {e}")
+                                        # OpenAI API로 그래프 분석 (패스워드 확인 후)
+                                        if ai_analysis_verified:
+                                            with st.spinner("🤖 AI가 그래프를 분석하고 있습니다..."):
+                                                try:
+                                                    # 그래프를 base64로 변환
+                                                    image_base64 = save_plot_as_base64(fig)
+                                                    if image_base64:
+                                                        # OpenAI API 호출
+                                                        analysis_result = analyze_with_openai(
+                                                            image_base64, 
+                                                            analysis_type=f"{period} 수익률 시계열"
+                                                        )
+                                                        
+                                                        # 분석 결과 표시
+                                                        st.subheader("🤖 AI 분석 결과")
+                                                        st.markdown(analysis_result)
+                                                except Exception as e:
+                                                    st.error(f"AI 분석 중 오류: {e}")
+                                        else:
+                                            if ai_analysis_enabled:
+                                                st.info("💡 AI 분석을 사용하려면 올바른 패스워드를 입력해주세요.")
+                                            else:
+                                                st.info("💡 AI 분석을 사용하려면 사이드바에서 'AI분석 포함'을 체크하고 패스워드를 입력해주세요.")
                                 
                                 # 요약 통계 테이블
                                 st.subheader("📊 시계열 요약 통계")
@@ -1534,63 +1779,75 @@ elif menu == "📈 시계열 수익률":
                                             summary_df[col] = summary_df[col].fillna(0)
                                     st.dataframe(summary_df, use_container_width=True)
                                     
-                                    # OpenAI API로 표 분석
-                                    with st.spinner("🤖 AI가 통계 표를 분석하고 있습니다..."):
-                                        try:
-                                            # 표 데이터를 문자열로 변환
-                                            table_data = summary_df.to_string(index=False)
-                                            
-                                            # 더미 이미지 생성 (표 분석용)
-                                            fig_dummy, ax_dummy = plt.subplots(figsize=(1, 1))
-                                            ax_dummy.text(0.5, 0.5, '통계 분석', ha='center', va='center', transform=ax_dummy.transAxes)
-                                            ax_dummy.axis('off')
-                                            
-                                            # 그래프를 base64로 변환
-                                            image_base64 = save_plot_as_base64(fig_dummy)
-                                            if image_base64:
-                                                # OpenAI API 호출
-                                                analysis_result = analyze_with_openai(
-                                                    image_base64, 
-                                                    table_data=table_data,
-                                                    analysis_type="시계열 수익률 통계"
-                                                )
+                                    # OpenAI API로 표 분석 (패스워드 확인 후)
+                                    if ai_analysis_verified:
+                                        with st.spinner("🤖 AI가 통계 표를 분석하고 있습니다..."):
+                                            try:
+                                                # 표 데이터를 문자열로 변환
+                                                table_data = summary_df.to_string(index=False)
                                                 
-                                                # 분석 결과 표시
-                                                st.subheader("🤖 AI 통계 분석 결과")
-                                                st.markdown(analysis_result)
-                                        except Exception as e:
-                                            st.error(f"AI 분석 중 오류: {e}")
+                                                # 더미 이미지 생성 (표 분석용)
+                                                fig_dummy, ax_dummy = plt.subplots(figsize=(1, 1))
+                                                ax_dummy.text(0.5, 0.5, '통계 분석', ha='center', va='center', transform=ax_dummy.transAxes)
+                                                ax_dummy.axis('off')
+                                                
+                                                # 그래프를 base64로 변환
+                                                image_base64 = save_plot_as_base64(fig_dummy)
+                                                if image_base64:
+                                                    # OpenAI API 호출
+                                                    analysis_result = analyze_with_openai(
+                                                        image_base64, 
+                                                        table_data=table_data,
+                                                        analysis_type="시계열 수익률 통계"
+                                                    )
+                                                    
+                                                    # 분석 결과 표시
+                                                    st.subheader("🤖 AI 통계 분석 결과")
+                                                    st.markdown(analysis_result)
+                                            except Exception as e:
+                                                st.error(f"AI 분석 중 오류: {e}")
+                                    else:
+                                        if ai_analysis_enabled:
+                                            st.info("💡 AI 분석을 사용하려면 올바른 패스워드를 입력해주세요.")
+                                        else:
+                                            st.info("💡 AI 분석을 사용하려면 사이드바에서 'AI분석 포함'을 체크하고 패스워드를 입력해주세요.")
                                 
                                 # 상세 데이터 테이블
                                 st.subheader("📋 상세 시계열 데이터")
                                 st.dataframe(df_timeline, use_container_width=True)
                                 
-                                # OpenAI API로 상세 데이터 분석
-                                with st.spinner("🤖 AI가 상세 데이터를 분석하고 있습니다..."):
-                                    try:
-                                        # 상세 데이터를 문자열로 변환 (처음 10행만)
-                                        detail_data = df_timeline.head(10).to_string(index=False)
-                                        
-                                        # 더미 이미지 생성 (데이터 분석용)
-                                        fig_dummy2, ax_dummy2 = plt.subplots(figsize=(1, 1))
-                                        ax_dummy2.text(0.5, 0.5, '데이터 분석', ha='center', va='center', transform=ax_dummy2.transAxes)
-                                        ax_dummy2.axis('off')
-                                        
-                                        # 그래프를 base64로 변환
-                                        image_base64 = save_plot_as_base64(fig_dummy2)
-                                        if image_base64:
-                                            # OpenAI API 호출
-                                            analysis_result = analyze_with_openai(
-                                                image_base64, 
-                                                table_data=detail_data,
-                                                analysis_type="시계열 상세 데이터"
-                                            )
+                                # OpenAI API로 상세 데이터 분석 (패스워드 확인 후)
+                                if ai_analysis_verified:
+                                    with st.spinner("🤖 AI가 상세 데이터를 분석하고 있습니다..."):
+                                        try:
+                                            # 상세 데이터를 문자열로 변환 (처음 10행만)
+                                            detail_data = df_timeline.head(10).to_string(index=False)
                                             
-                                            # 분석 결과 표시
-                                            st.subheader("🤖 AI 상세 데이터 분석 결과")
-                                            st.markdown(analysis_result)
-                                    except Exception as e:
-                                        st.error(f"AI 분석 중 오류: {e}")
+                                            # 더미 이미지 생성 (데이터 분석용)
+                                            fig_dummy2, ax_dummy2 = plt.subplots(figsize=(1, 1))
+                                            ax_dummy2.text(0.5, 0.5, '데이터 분석', ha='center', va='center', transform=ax_dummy2.transAxes)
+                                            ax_dummy2.axis('off')
+                                            
+                                            # 그래프를 base64로 변환
+                                            image_base64 = save_plot_as_base64(fig_dummy2)
+                                            if image_base64:
+                                                # OpenAI API 호출
+                                                analysis_result = analyze_with_openai(
+                                                    image_base64, 
+                                                    table_data=detail_data,
+                                                    analysis_type="시계열 상세 데이터"
+                                                )
+                                                
+                                                # 분석 결과 표시
+                                                st.subheader("🤖 AI 상세 데이터 분석 결과")
+                                                st.markdown(analysis_result)
+                                        except Exception as e:
+                                            st.error(f"AI 분석 중 오류: {e}")
+                                else:
+                                    if ai_analysis_enabled:
+                                        st.info("💡 AI 분석을 사용하려면 올바른 패스워드를 입력해주세요.")
+                                    else:
+                                        st.info("💡 AI 분석을 사용하려면 사이드바에서 'AI분석 포함'을 체크하고 패스워드를 입력해주세요.")
                                 
                             else:
                                 st.warning("선택한 조건에 해당하는 데이터가 없습니다.")
