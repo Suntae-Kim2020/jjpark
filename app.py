@@ -1596,7 +1596,7 @@ elif menu == "📈 시계열 수익률":
                                 st.warning("선택한 조건에 해당하는 데이터가 없습니다.")
                                 
                         except Exception as e:
-                            st.error(f"시계열 분석 중 오류 발생: {e}")
+                            st.error(f"시계열 분석 중 오류 발생생생생생: {e}")
                 else:
                     st.warning(f"{selected_manager}의 상품 데이터가 없습니다.")
                     
