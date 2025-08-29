@@ -1,11 +1,19 @@
 # OpenAI API 설정
 # Streamlit Cloud Secrets를 우선적으로 사용
 import os
-import toml
+
+# toml 모듈이 없을 경우를 대비한 fallback
+try:
+    import toml
+except ImportError:
+    toml = None
 
 # config.toml에서 설정 읽기 (로컬 개발용)
 def load_config_from_toml():
     """config.toml 파일에서 설정을 읽어오는 함수"""
+    if toml is None:
+        return {}
+    
     try:
         config_path = '.streamlit/config.toml'
         if os.path.exists(config_path):
