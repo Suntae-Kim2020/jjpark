@@ -30,7 +30,12 @@ config_data = load_config_from_toml()
 # Streamlit Cloud Secrets에서 설정 가져오기 (최우선순위)
 try:
     import streamlit as st
-    if hasattr(st, 'secrets'):
+    STREAMLIT_AVAILABLE = True
+except ImportError:
+    STREAMLIT_AVAILABLE = False
+    st = None
+
+if STREAMLIT_AVAILABLE and hasattr(st, 'secrets'):
         # Streamlit Cloud Secrets에서 API 키 가져오기
         if 'OPENAI_API_KEY' in st.secrets:
             OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
@@ -51,8 +56,13 @@ try:
         else:
             # Secrets에 없으면 환경 변수에서 가져오기
             ADMIN_PW = os.getenv('admin_pw', 'admin123')
-    else:
+    elif not STREAMLIT_AVAILABLE:
         # Streamlit이 없는 경우 (스크립트 실행 시)
+        OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
+        OPENAI_API_USE_PW = config_data.get('openai', {}).get('OPENAI_API_USE_PW', 'bslee73')
+        ADMIN_PW = os.getenv('admin_pw', 'admin123')
+    else:
+        # Streamlit은 있지만 secrets가 없는 경우
         OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
         OPENAI_API_USE_PW = config_data.get('openai', {}).get('OPENAI_API_USE_PW', 'bslee73')
         ADMIN_PW = os.getenv('admin_pw', 'admin123')

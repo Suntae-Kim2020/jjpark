@@ -499,8 +499,16 @@ if menu == "🏠 메인 화면":
     
     # 이미지 슬라이드쇼 (Streamlit Cloud 호환: 1초 자동 교체)
     from pathlib import Path
-    from streamlit_autorefresh import st_autorefresh
     import time, os
+    
+    # streamlit_autorefresh 모듈이 없을 경우를 대비한 fallback
+    try:
+        from streamlit_autorefresh import st_autorefresh
+        AUTOREFRESH_AVAILABLE = True
+    except ImportError:
+        AUTOREFRESH_AVAILABLE = False
+        def st_autorefresh(interval=1000, limit=None, key=None):
+            return int(time.time())
 
     # 1초마다 앱을 rerun (JS 금지, 공식 autorefresh 사용)
     # limit=None 이면 무제한 반복
