@@ -64,7 +64,7 @@ import seaborn as sns
 
 # Streamlit Cloud 환경에서 한글 폰트 설정
 def setup_korean_font():
-    """Streamlit Cloud 환경에서 한글 폰폰트를 설정하는 함수"""
+    """Streamlit Cloud 환경에서 한글 폰트를 설정하는 함수"""
     try:
         # 1. GitHub fonts 디렉토리의 NanumGothic.ttf 우선 사용
         github_font_path = 'fonts/NanumGothic.ttf'
