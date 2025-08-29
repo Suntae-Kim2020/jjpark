@@ -35,7 +35,8 @@ except ImportError:
     STREAMLIT_AVAILABLE = False
     st = None
 
-if STREAMLIT_AVAILABLE and hasattr(st, 'secrets'):
+try:
+    if STREAMLIT_AVAILABLE and hasattr(st, 'secrets'):
         # Streamlit Cloud Secrets에서 API 키 가져오기
         if 'OPENAI_API_KEY' in st.secrets:
             OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']

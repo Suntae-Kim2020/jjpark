@@ -10,7 +10,11 @@ import requests
 import json
 import base64
 from io import BytesIO
-from config import *
+try:
+    from config import *
+except ImportError as e:
+    st.error(f"설정 파일을 불러올 수 없습니다: {e}")
+    st.stop()
 
 # 한글 폰트 지원을 위한 CSS 스타일 추가
 st.markdown("""
