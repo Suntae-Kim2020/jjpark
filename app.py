@@ -785,99 +785,13 @@ elif menu == "📈 수익률 분석":
                 
                 st.success(f"✅ 분석 데이터 로드 완료: {len(df_analysis)}개 레코드")
                 
-                # 컬럼 매핑
-                period_mapping = {
-                    "1M": "r_1m",
-                    "3M": "r_3m", 
-                    "6M": "r_6m",
-                    "1Y": "r_1y",
-                    "2Y": "r_2y",
-                    "3Y": "r_3y",
-                    "설정일이후": "since_inception"
-                }
-                
-                # 선택된 기간의 컬럼만 필터링
-                selected_cols = [period_mapping[period] for period in analysis_periods if period in period_mapping]
-                
-                if not selected_cols:
-                    st.warning("분석할 수익률 기간을 선택해주세요.")
-                    st.stop()
-                
-                # 통계 테이블
-                if show_statistics:
-                    st.subheader("📊 수익률 통계")
-                    stats_df = df_analysis[selected_cols].describe()
-                    st.dataframe(stats_df, use_container_width=True)
-                
-                # 수익률 분포 히스토그램
-                if show_histogram:
-                    st.subheader("📈 수익률 분포 히스토그램")
-                    
-                    # 히스토그램 분석 기간 선택 (session_state로 상태 유지)
-                    if 'histogram_period' not in st.session_state:
-                        st.session_state.histogram_period = analysis_periods[0] if analysis_periods else "1Y"
-                    
-                    selected_period = st.selectbox("히스토그램 분석 기간 선택", analysis_periods, key="histogram_period_select_1")
-                    st.session_state.histogram_period = selected_period
-                    col_name = period_mapping[selected_period]
-                    
-                    fig, ax = plt.subplots(figsize=(10, 6))
-                    font_prop = get_plot_font()
-                    ax.hist(df_analysis[col_name].dropna(), bins=30, alpha=0.7, edgecolor='black', color='skyblue')
-                    if font_prop:
-                        ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12, fontproperties=font_prop)
-                        ax.set_ylabel('빈도', fontsize=12, fontproperties=font_prop)
-                        ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
-                    else:
-                        ax.set_xlabel(f'{selected_period} 수익률 (%)', fontsize=12)
-                        ax.set_ylabel('빈도', fontsize=12)
-                        ax.set_title(f'{selected_period} 수익률 분포', fontsize=14, fontweight='bold')
-                    ax.grid(True, alpha=0.3)
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                
-                # 박스플롯
-                if show_boxplot:
-                    st.subheader("📦 수익률 박스플롯")
-                    fig2, ax2 = plt.subplots(figsize=(12, 6))
-                    font_prop = get_plot_font()
-                    df_analysis[selected_cols].boxplot(ax=ax2)
-                    if font_prop:
-                        ax2.set_ylabel('수익률 (%)', fontsize=12, fontproperties=font_prop)
-                        ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold', fontproperties=font_prop)
-                    else:
-                        ax2.set_ylabel('수익률 (%)', fontsize=12)
-                        ax2.set_title('기간별 수익률 분포', fontsize=14, fontweight='bold')
-                    ax2.tick_params(axis='x', rotation=45)
-                    plt.tight_layout()
-                    st.pyplot(fig2)
-                
-                # 추가 분석: 상위/하위 수익률 상품
-                st.subheader("🏆 수익률 순위")
-                
-                # 순위 분석 기간 선택 (session_state로 상태 유지)
-                if 'rank_period' not in st.session_state:
-                    st.session_state.rank_period = analysis_periods[0] if analysis_periods else "1Y"
-                
-                rank_period = st.selectbox("순위 분석 기간 선택", analysis_periods, key="rank_period_select_1")
-                st.session_state.rank_period = rank_period
-                rank_col = period_mapping[rank_period]
-                
-                st.write("**상위 10개 상품**")
-                top_products = df_analysis.nlargest(10, rank_col)[['manager', 'product_name', rank_col]]
-                st.dataframe(top_products, use_container_width=True)
-                
-                st.write("**하위 10개 상품**")
-                bottom_products = df_analysis.nsmallest(10, rank_col)[['manager', 'product_name', rank_col]]
-                st.dataframe(bottom_products, use_container_width=True)
-                
             else:
                 st.warning("선택한 기간에 데이터가 없습니다.")
                 
         except Exception as e:
             st.error(f"분석 중 오류 발생: {e}")
     
-    # 분석 결과가 있으면 계속 표시
+    # 분석 결과가 있으면 표시
     if 'analysis_completed' in st.session_state and st.session_state.analysis_completed:
         df_analysis = st.session_state.df_analysis
         analysis_periods = st.session_state.analysis_periods
